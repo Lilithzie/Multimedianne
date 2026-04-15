@@ -1,10 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>MULTIMEDIA AND AUTHORING</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multimedia and Authoring Projects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>Hello, hellooo!</h1>
-  <p>Another placeholder, try edit</p>
+<body class="page-home">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark"></span>
+        <span>Multimedia and Authoring</span>
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a class="active" href="index.html">Home</a>
+        <a href="rotoscoping.html">Rotoscoping</a>
+        <a href="solar-system.html">3D Solar System</a>
+        <a href="apps-used.html">Apps Used</a>
+        <a href="about.html">About</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero panel">
+        <div class="hero-copy">
+          <p class="eyebrow">Creative Portfolio Website</p>
+          <h1>Multimedia work shaped by motion, storytelling, and digital craft.</h1>
+          <p class="lead">
+            This website presents a collection of multimedia and authoring projects, from frame-by-frame
+            rotoscoping to a stylized 3D solar system. Each page highlights process, tools, and the ideas
+            behind the final output.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="rotoscoping.html">Explore Projects</a>
+            <a class="button button-secondary" href="about.html">Learn More</a>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+          <div class="orbit-core"></div>
+          <div class="orbit-ring orbit-ring-one"></div>
+          <div class="orbit-ring orbit-ring-two"></div>
+          <div class="orbit-dot orbit-dot-one"></div>
+          <div class="orbit-dot orbit-dot-two"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">Project Highlights</p>
+          <h2>A modern showcase under a starry-night palette.</h2>
+        </div>
+        <div class="card-grid">
+          <article class="feature-card">
+            <p class="card-label">Rotoscoping</p>
+            <h3>Tracing movement with precision and style</h3>
+            <p>
+              A look at motion studies, frame interpretation, and how live footage can be transformed into
+              expressive animated visuals.
+            </p>
+            <a href="rotoscoping.html">Open page</a>
+          </article>
+
+          <article class="feature-card">
+            <p class="card-label">3D Solar System</p>
+            <h3>Building space with form, light, and scale</h3>
+            <p>
+              A planetary scene focused on modeling, texture choices, scene organization, and depth-driven
+              composition.
+            </p>
+            <a href="solar-system.html">Open page</a>
+          </article>
+
+          <article class="feature-card">
+            <p class="card-label">Apps Used</p>
+            <h3>The software behind the creative process</h3>
+            <p>
+              A quick breakdown of the tools used for editing, animation, compositing, and 3D authoring
+              throughout the projects.
+            </p>
+            <a href="apps-used.html">Open page</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel split-panel">
+        <div>
+          <p class="eyebrow">Workflow</p>
+          <h2>From concept to polished output.</h2>
+          <p class="lead-small">
+            The projects featured here move through research, sketching, assembly, refinement, and final
+            presentation. The goal is not just to finish a piece, but to communicate ideas clearly through
+            media.
+          </p>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <span>01</span>
+            <div>
+              <h3>Planning</h3>
+              <p>Defining concept, mood, references, and expected outcomes.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span>02</span>
+            <div>
+              <h3>Production</h3>
+              <p>Creating assets, animating sequences, and assembling scenes.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span>03</span>
+            <div>
+              <h3>Refinement</h3>
+              <p>Improving composition, timing, lighting, and overall visual quality.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
