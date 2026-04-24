@@ -33,8 +33,7 @@
     </header>
 
     <main id="main-content">
-      <section class="panel page-intro">
-        <p class="eyebrow">Project Page</p>
+      <section class="page-intro">
         <h1>3D Solar System</h1>
         <p class="lead">
           A 3D scene that explores planetary scale, lighting, orbit-inspired composition, and the visual
@@ -63,6 +62,99 @@
             <li>Organize the scene for camera-friendly composition and animation.</li>
           </ul>
         </article>
+      </section>
+
+      <section class="panel" id="orbit-calculator" aria-label="Solar system time and motion calculator">
+        <div class="orbit-lab">
+          <div class="orbit-left">
+            <div class="section-heading">
+              <p class="eyebrow">Calculator</p>
+              <h2>Celestial Bodies &amp; Orbital Dynamics</h2>
+            </div>
+
+            <div class="orbit-field">
+              <label for="earth-years">Enter time in Earth years</label>
+              <input
+                class="orbit-input"
+                id="earth-years"
+                name="earth-years"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                value="1">
+            </div>
+
+            <article class="orbit-detail" aria-label="Selected body details" aria-live="polite">
+              <p class="card-label" data-orbit-detail="type">Planet</p>
+              <h3 class="orbit-title" data-orbit-detail="name">Mercury</h3>
+              <div class="orbit-stats" role="group" aria-label="Selected body stats">
+                <div class="orbit-row">
+                  <span>Age:</span>
+                  <span class="orbit-value" data-orbit-detail="age">—</span>
+                </div>
+                <div class="orbit-row">
+                  <span>Revolutions:</span>
+                  <span class="orbit-value" data-orbit-detail="revolutions">—</span>
+                </div>
+                <div class="orbit-row">
+                  <span>Orbital Period:</span>
+                  <span class="orbit-value" data-orbit-detail="period">—</span>
+                </div>
+                <div class="orbit-row">
+                  <span>Distance from Sun:</span>
+                  <span class="orbit-value" data-orbit-detail="distance">—</span>
+                </div>
+              </div>
+              <p class="orbit-description"><strong>Description:</strong> <span data-orbit-detail="description">—</span></p>
+            </article>
+          </div>
+
+          <div class="orbit-right" aria-label="Swipeable planet renders">
+            <div class="video-frame" aria-label="Solar system video">
+              <iframe
+                src="https://www.youtube.com/embed/VIDEO_ID_SOLAR_SYSTEM"
+                title="Solar System Render Video"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+            <div class="orbit-carousel" id="orbit-carousel" aria-label="Swipe left or right to change planets" tabindex="0">
+              <div class="orbit-slide" data-orbit-name="Mercury" data-orbit-type="Planet" data-period-days="87.969" data-distance-million-km="57.9" data-description="The smallest and innermost planet, with extreme temperature shifts and a cratered surface.">
+                <div class="orbit-render" role="img" aria-label="Mercury render" data-render="Mercury"></div>
+                <p class="orbit-caption">Mercury</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Venus" data-orbit-type="Planet" data-period-days="224.701" data-distance-million-km="108.2" data-description="A rocky world with a dense atmosphere, intense heat, and bright reflective clouds.">
+                <div class="orbit-render" role="img" aria-label="Venus render" data-render="Venus"></div>
+                <p class="orbit-caption">Venus</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Earth" data-orbit-type="Planet" data-period-days="365.256" data-distance-million-km="149.6" data-description="Our home planet, with liquid water, atmosphere, and a stable orbit that defines the Earth year.">
+                <div class="orbit-render" role="img" aria-label="Earth render" data-render="Earth"></div>
+                <p class="orbit-caption">Earth</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Mars" data-orbit-type="Planet" data-period-days="686.98" data-distance-million-km="227.9" data-description="A cold desert planet known for red iron-rich dust, canyons, and the search for past water.">
+                <div class="orbit-render" role="img" aria-label="Mars render" data-render="Mars"></div>
+                <p class="orbit-caption">Mars</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Jupiter" data-orbit-type="Planet" data-period-days="4332.59" data-distance-million-km="778.5" data-description="The largest planet, a gas giant with powerful storms and fast rotation shaping dramatic cloud bands.">
+                <div class="orbit-render" role="img" aria-label="Jupiter render" data-render="Jupiter"></div>
+                <p class="orbit-caption">Jupiter</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Saturn" data-orbit-type="Planet" data-period-days="10759.22" data-distance-million-km="1434" data-description="A gas giant famous for its rings, with many moons and a long orbit around the Sun.">
+                <div class="orbit-render" role="img" aria-label="Saturn render" data-render="Saturn"></div>
+                <p class="orbit-caption">Saturn</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Uranus" data-orbit-type="Planet" data-period-days="30685.4" data-distance-million-km="2871" data-description="An ice giant that rotates on its side, creating unusual seasons and a faint ring system.">
+                <div class="orbit-render" role="img" aria-label="Uranus render" data-render="Uranus"></div>
+                <p class="orbit-caption">Uranus</p>
+              </div>
+              <div class="orbit-slide" data-orbit-name="Neptune" data-orbit-type="Planet" data-period-days="60190" data-distance-million-km="4495" data-description="A distant ice giant with strong winds and deep-blue color driven by methane in its atmosphere.">
+                <div class="orbit-render" role="img" aria-label="Neptune render" data-render="Neptune"></div>
+                <p class="orbit-caption">Neptune</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="panel split-panel">
@@ -96,6 +188,17 @@
               <p>Lighting and camera angle create the final dramatic presentation.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="panel" id="script-card" aria-label="Download or copy script">
+        <div class="section-heading">
+          <h2>Solar System Blender Script</h2>
+        </div>
+        <textarea class="script-textarea" id="script-snippet" rows="10" readonly placeholder="(Script will appear here)"></textarea>
+        <div class="script-actions" role="group" aria-label="Script actions">
+          <button class="button button-secondary" type="button" id="copy-script">Copy</button>
+          <button class="button button-primary" type="button" id="download-script">Download</button>
         </div>
       </section>
     </main>
