@@ -23,8 +23,7 @@
   --body-vignette:
     radial-gradient(circle at center, transparent 0, transparent 58%, rgba(2, 5, 13, 0.72) 100%);
 
-  --cursor-default: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%202%20L15%2012%20L9.8%2013.4%20L12.4%2021%20L9.8%2022%20L7.2%2014.3%20L3.7%2017.7%20Z'%20fill='%23ffffff'%20stroke='%235a3c61'%20stroke-width='1.6'%20stroke-linejoin='round'/%3E%3Cpath%20d='M18.6%203.9%20c0.9-0.9%202.3-0.9%203.2%200%200.9%200.9%200.9%202.3%200%203.2%20-0.9%200.9%20-3.2%202.9%20-3.2%202.9%20s-2-2.3%20-2.9-3.2%20c-0.9-0.9%20-0.9-2.3%200-3.2%20z'%20fill='%23ff8eb1'%20opacity='0.85'/%3E%3C/svg%3E") 0 0, auto;
-  --cursor-pointer: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%202%20L15%2012%20L9.8%2013.4%20L12.4%2021%20L9.8%2022%20L7.2%2014.3%20L3.7%2017.7%20Z'%20fill='%23ff8eb1'%20stroke='%23ffffff'%20stroke-width='1.6'%20stroke-linejoin='round'/%3E%3Cpath%20d='M18.6%203.9%20c0.9-0.9%202.3-0.9%203.2%200%200.9%200.9%200.9%202.3%200%203.2%20-0.9%200.9%20-3.2%202.9%20-3.2%202.9%20s-2-2.3%20-2.9-3.2%20c-0.9-0.9%20-0.9-2.3%200-3.2%20z'%20fill='%23ffffff'%20opacity='0.9'/%3E%3C/svg%3E") 0 0, pointer;
+
 }
 
 * {
@@ -41,7 +40,6 @@ body {
   min-height: 100vh;
   color: var(--text);
   font-family: "Space Grotesk", "Segoe UI", sans-serif;
-  cursor: var(--cursor-default);
   background: var(--body-background);
   position: relative;
   overflow-x: hidden;
@@ -60,7 +58,6 @@ button,
 .weekly-nav,
 [data-weekly-nav],
 [tabindex]:not([tabindex="-1"]) {
-  cursor: var(--cursor-pointer);
 }
 
 input,
@@ -71,7 +68,6 @@ textarea {
 input[type="checkbox"],
 input[type="radio"],
 select {
-  cursor: var(--cursor-pointer);
 }
 
 body.is-entering {
@@ -353,7 +349,7 @@ main {
 .hero-projects {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   gap: clamp(1.2rem, 3vw, 2.2rem);
   margin-top: 3.5rem;
 }
@@ -826,17 +822,17 @@ main {
   background:
     radial-gradient(circle at 32% 28%, color-mix(in srgb, white 40%, var(--accent-soft)), color-mix(in srgb, var(--accent) 62%, var(--bg-deep)) 70%);
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.35);
-  filter: hue-rotate(var(--render-hue)) saturate(1.15);
+  overflow: hidden;
+  position: relative;
 }
 
-.orbit-render[data-render="Mercury"] { --render-hue: 18deg; }
-.orbit-render[data-render="Venus"] { --render-hue: 315deg; }
-.orbit-render[data-render="Earth"] { --render-hue: 205deg; }
-.orbit-render[data-render="Mars"] { --render-hue: 28deg; }
-.orbit-render[data-render="Jupiter"] { --render-hue: 48deg; }
-.orbit-render[data-render="Saturn"] { --render-hue: 62deg; }
-.orbit-render[data-render="Uranus"] { --render-hue: 165deg; }
-.orbit-render[data-render="Neptune"] { --render-hue: 200deg; }
+.orbit-render canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+
 
 .orbit-caption {
   margin: 0.95rem 0 0;
