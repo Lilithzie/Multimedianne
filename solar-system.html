@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js" defer></script>
 </head>
 <body class="page-solar">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -42,34 +43,11 @@
         </p>
       </section>
 
-      <section class="content-grid">
-        <article class="panel">
-          <p class="card-label">Concept</p>
-          <h2>A cinematic view of planets and motion.</h2>
-          <p>
-            The solar system project turns astronomical structure into a stylized visual environment. The
-            focus is on spatial depth, glowing light sources, and arranging planets so the scene feels both
-            educational and visually striking.
-          </p>
-        </article>
-
-        <article class="panel">
-          <p class="card-label">Production Notes</p>
-          <h2>Key design decisions</h2>
-          <ul class="detail-list">
-            <li>Use sphere-based modeling for planets and supporting rings.</li>
-            <li>Apply texture and material settings to distinguish surfaces.</li>
-            <li>Position lights to create contrast, highlights, and mood.</li>
-            <li>Organize the scene for camera-friendly composition and animation.</li>
-          </ul>
-        </article>
-      </section>
-
       <section class="panel" id="orbit-calculator" aria-label="Solar system time and motion calculator">
         <div class="orbit-lab">
           <div class="orbit-left">
             <div class="section-heading">
-              <p class="eyebrow">Calculator</p>
+              <p class="eyebrow">The Solar System</p>
               <h2>Celestial Bodies &amp; Orbital Dynamics</h2>
             </div>
 
@@ -114,7 +92,7 @@
           <div class="orbit-right" aria-label="Swipeable planet renders">
             <div class="video-frame" aria-label="Solar system video">
               <iframe
-                src="https://www.youtube.com/embed/VIDEO_ID_SOLAR_SYSTEM"
+                src="https://www.youtube.com/embed/6WPe8IdQzlo"
                 title="Solar System Render Video"
                 loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -176,11 +154,10 @@
 
       <section class="panel split-panel">
         <div>
-          <p class="eyebrow">Visual Strengths</p>
-          <h2>Why the scene stands out</h2>
+          <h2>The Solar System Project</h2>
           <p class="lead-small">
             The project combines technical 3D skills with aesthetic choices such as color harmony, scale,
-            and atmospheric glow to produce a more immersive final render.
+            and atmospheric glow to produce a more immersive final render. Scripts are used to create the solar system in Blender.
           </p>
         </div>
         <div class="timeline">
@@ -213,8 +190,311 @@
           <p class="eyebrow">Script</p>
           <h2>Blender Project Script</h2>
         </div>
-        <p class="orbit-help">Static script provided by the creator. Use Copy or Download.</p>
-        <textarea class="script-textarea" id="script-snippet" rows="10" readonly placeholder="(Script will appear here)"></textarea>
+        <p class="orbit-help">The Blender script used for creating the solar system. Use Copy or Download to try ^ ^.</p>
+        <textarea class="script-textarea" id="script-snippet" rows="24" readonly>import bpy
+    import math
+    import os
+
+    # ==========================================
+    # 1. SETUP & DATA
+    # ==========================================
+
+    # Directory - change as needed
+    BASE_DIR = r"C:\xampp\htdocs\Multimedianne\Planet Textures"
+
+    # [Name, Texture File, Size, Distance from Sun, Orbit Speed, Axis Spin Speed]
+    PLANETS = [
+      {"name": "Sun",     "tex": "2k_sun.jpg",     "size": 5.0, "dist": 0.0,  "orb_spd": 0.0,  "rot_spd": 0.5},
+      {"name": "Mercury", "tex": "2k_mercury.jpg", "size": 0.3, "dist": 8.0,  "orb_spd": 4.1,  "rot_spd": 0.1},
+      {"name": "Venus",   "tex": "2k_venus_surface.jpg",   "size": 0.7, "dist": 11.0, "orb_spd": 1.6,  "rot_spd": -0.1},
+      {"name": "Earth",   "tex": "2k_earth_daymap.jpg",    "size": 0.8, "dist": 15.0, "orb_spd": 1.0,  "rot_spd": 2.0},
+      {"name": "Mars",    "tex": "2k_mars.jpg",    "size": 0.4, "dist": 19.0, "orb_spd": 0.5,  "rot_spd": 1.9},
+      {"name": "Jupiter", "tex": "2k_jupiter.jpg", "size": 2.2, "dist": 28.0, "orb_spd": 0.08, "rot_spd": 4.5},
+      {"name": "Saturn",  "tex": "2k_saturn.jpg",  "size": 1.8, "dist": 38.0, "orb_spd": 0.03, "rot_spd": 4.0},
+      {"name": "Uranus",  "tex": "2k_uranus.jpg",  "size": 1.2, "dist": 48.0, "orb_spd": 0.01, "rot_spd": -2.5},
+      {"name": "Neptune", "tex": "2k_neptune.jpg", "size": 1.1, "dist": 58.0, "orb_spd": 0.006,"rot_spd": 2.8}
+    ]
+
+    # Force Bloom off in Blender Settings
+    if hasattr(bpy.context.scene, 'eevee') and hasattr(bpy.context.scene.eevee, 'use_bloom'):
+      bpy.context.scene.eevee.use_bloom = False
+
+    # Cleanup Old System
+    names_to_delete = [p["name"] for p in PLANETS] + [p["name"]+"_Orbit" for p in PLANETS] + [p["name"]+"_Pivot" for p in PLANETS] + [p["name"]+"_Text" for p in PLANETS] + ["Saturn_Ring"]
+    for obj in bpy.data.objects:
+      if obj.name in names_to_delete or obj.name == "Sun_Light":
+        bpy.data.objects.remove(obj, do_unlink=True)
+
+    for window in bpy.context.window_manager.windows:
+      for area in window.screen.areas:
+        if area.type == 'VIEW_3D':
+          for space in area.spaces:
+            if space.type == 'VIEW_3D':
+              space.overlay.show_relationship_lines = False
+
+    # ==========================================
+    # 2. HELPER FUNCTIONS & MATERIALS
+    # ==========================================
+    def create_material(name, tex_path, is_sun=False):
+      mat = bpy.data.materials.new(name + "_Mat")
+      mat.use_nodes = True
+      nodes, links = mat.node_tree.nodes, mat.node_tree.links
+      nodes.clear()
+
+      out = nodes.new('ShaderNodeOutputMaterial')
+      bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+      tex = nodes.new('ShaderNodeTexImage')
+
+      mapping = nodes.new('ShaderNodeMapping')
+      coord = nodes.new('ShaderNodeTexCoord')
+      links.new(coord.outputs['UV'], mapping.inputs['Vector'])
+      links.new(mapping.outputs['Vector'], tex.inputs['Vector'])
+
+      if os.path.exists(tex_path):
+        tex.image = bpy.data.images.load(tex_path)
+
+      if is_sun:
+        bsdf.inputs['Base Color'].default_value = (0, 0, 0, 1)
+        if 'Emission Strength' in bsdf.inputs: bsdf.inputs['Emission Strength'].default_value = 1.0
+        em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
+        links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
+      else:
+        links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+        if 'Roughness' in bsdf.inputs: bsdf.inputs['Roughness'].default_value = 0.9
+        if 'Specular' in bsdf.inputs: bsdf.inputs['Specular'].default_value = 0.0
+        if 'Specular IOR Level' in bsdf.inputs: bsdf.inputs['Specular IOR Level'].default_value = 0.0
+
+      links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+      return mat
+
+    def create_ring_material(name, tex_path):
+      mat = bpy.data.materials.new(name)
+      mat.use_nodes = True
+      nodes, links = mat.node_tree.nodes, mat.node_tree.links
+      nodes.clear()
+
+      out = nodes.new('ShaderNodeOutputMaterial')
+      bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+      tex = nodes.new('ShaderNodeTexImage')
+
+      if os.path.exists(tex_path): tex.image = bpy.data.images.load(tex_path)
+
+      coord = nodes.new('ShaderNodeTexCoord')
+      sep = nodes.new('ShaderNodeSeparateXYZ')
+      comb = nodes.new('ShaderNodeCombineXYZ')
+      length = nodes.new('ShaderNodeVectorMath')
+      length.operation = 'LENGTH'
+
+      links.new(coord.outputs['Object'], sep.inputs['Vector'])
+      links.new(sep.outputs['X'], comb.inputs['X'])
+      links.new(sep.outputs['Y'], comb.inputs['Y'])
+      links.new(comb.outputs['Vector'], length.inputs[0])
+
+      map_range = nodes.new('ShaderNodeMapRange')
+      map_range.inputs[1].default_value = 2.0
+      map_range.inputs[2].default_value = 4.25
+
+      uv_comb = nodes.new('ShaderNodeCombineXYZ')
+      uv_comb.inputs['Y'].default_value = 0.5
+
+      links.new(length.outputs['Value'], map_range.inputs['Value'])
+      links.new(map_range.outputs['Result'], uv_comb.inputs['X'])
+      links.new(uv_comb.outputs['Vector'], tex.inputs['Vector'])
+
+      links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+      links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
+
+      if 'Specular' in bsdf.inputs: bsdf.inputs['Specular'].default_value = 0.0
+      if 'Specular IOR Level' in bsdf.inputs: bsdf.inputs['Specular IOR Level'].default_value = 0.0
+
+      em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
+      links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
+      if 'Emission Strength' in bsdf.inputs: bsdf.inputs['Emission Strength'].default_value = 0.15
+
+      links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+      return mat
+
+    # --- UPDATED: DELAYED ROTATION ---
+    def animate_infinite_spin(obj, speed_multiplier, start_frame=0):
+      if speed_multiplier == 0: return
+      obj.rotation_mode = 'XYZ'
+
+      driver_speed = (math.pi * speed_multiplier) / 60.0
+      driver = obj.driver_add("rotation_euler", 2)
+
+      # Conditional Driver: If frame is less than start_frame, stay at 0. Otherwise, start spinning.
+      driver.driver.expression = f"(frame - {start_frame}) * {driver_speed} if frame > {start_frame} else 0.0"
+
+    # Material for the orbital rings
+    line_mat = bpy.data.materials.new("Orbit_Track_Mat")
+    line_mat.use_nodes = True
+    line_mat.node_tree.nodes.clear()
+    out_node = line_mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+    bsdf_node = line_mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+    bsdf_node.inputs['Base Color'].default_value = (0, 0, 0, 1)
+    if 'Emission Color' in bsdf_node.inputs: bsdf_node.inputs['Emission Color'].default_value = (1, 1, 1, 1)
+    if 'Emission Strength' in bsdf_node.inputs: bsdf_node.inputs['Emission Strength'].default_value = 0.5
+    line_mat.node_tree.links.new(bsdf_node.outputs['BSDF'], out_node.inputs['Surface'])
+
+    # Material for the Text Labels
+    text_mat = bpy.data.materials.new("Planet_Text_Mat")
+    text_mat.use_nodes = True
+    text_mat.node_tree.nodes.clear()
+    t_out = text_mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+    t_bsdf = text_mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+    t_bsdf.inputs['Base Color'].default_value = (1, 1, 1, 1)
+    if 'Emission Color' in t_bsdf.inputs: t_bsdf.inputs['Emission Color'].default_value = (1, 1, 1, 1)
+    if 'Emission Strength' in t_bsdf.inputs: t_bsdf.inputs['Emission Strength'].default_value = 2.0
+    text_mat.node_tree.links.new(t_bsdf.outputs['BSDF'], t_out.inputs['Surface'])
+
+    # ==========================================
+    # 3. CAMERA SETUP & INTRO ANIMATION
+    # ==========================================
+    cam = bpy.data.objects.get("Camera")
+    if not cam:
+      bpy.ops.object.camera_add()
+      cam = bpy.context.active_object
+      cam.name = "Camera"
+
+    cam.data.lens = 45
+    cam.data.clip_end = 10000.0
+    bpy.context.scene.camera = cam
+
+    # --- Faster Intro Animation ---
+    intro_duration = 120 # Reduced from 200 for a snappier camera sweep
+
+    # 1. Start Position (Frame 1): High up and to the side
+    cam.location = (250, 350, 150)
+    cam.keyframe_insert(data_path="location", frame=1)
+
+    # 2. End Position: Sweeps down to the classic view
+    cam.location = (0, 160, 60)
+    cam.keyframe_insert(data_path="location", frame=intro_duration)
+
+    # ==========================================
+    # 4. BUILD THE SOLAR SYSTEM & TEXT
+    # ==========================================
+    for p in PLANETS:
+      is_sun = (p["name"] == "Sun")
+      tex_full_path = os.path.join(BASE_DIR, p["tex"])
+
+      # 4a. Orbits & Pivots
+      if not is_sun:
+        bpy.ops.curve.primitive_bezier_circle_add(radius=p["dist"], location=(0, 0, 0))
+        orbit_line = bpy.context.active_object
+        orbit_line.name = p["name"] + "_Orbit"
+        orbit_line.data.bevel_depth = 0.03
+        orbit_line.data.materials.append(line_mat)
+
+        bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+        pivot = bpy.context.active_object
+        pivot.name = p["name"] + "_Pivot"
+        pivot.hide_viewport = True
+
+        # Add intro delay to orbit speed
+        animate_infinite_spin(pivot, p["orb_spd"], intro_duration)
+
+      # 4b. Planet Bodies
+      bpy.ops.mesh.primitive_uv_sphere_add(
+        segments=128 if is_sun else 64,
+        ring_count=64 if is_sun else 32,
+        radius=p["size"],
+        location=(p["dist"], 0, 0)
+      )
+      body = bpy.context.active_object
+      body.name = p["name"]
+      bpy.ops.object.shade_smooth()
+
+      if is_sun: body.visible_shadow = False
+
+      mat = create_material(p["name"], tex_full_path, is_sun)
+      body.data.materials.append(mat)
+
+      # Add intro delay to axis spin
+      animate_infinite_spin(body, p["rot_spd"], intro_duration)
+
+      if not is_sun: body.parent = pivot
+
+      # 4c. Planet Text Labels
+      bpy.ops.object.text_add(location=(p["dist"], 0, p["size"] + 0.8))
+      txt_obj = bpy.context.active_object
+      txt_obj.name = p["name"] + "_Text"
+      txt_obj.data.body = p["name"]
+      txt_obj.data.align_x = 'CENTER'
+      txt_obj.data.align_y = 'CENTER'
+
+      text_scale = 1.5 if is_sun else 0.8
+      txt_obj.scale = (text_scale, text_scale, text_scale)
+      txt_obj.data.materials.append(text_mat)
+
+      if not is_sun: txt_obj.parent = pivot
+
+      track = txt_obj.constraints.new(type='TRACK_TO')
+      track.target = cam
+      track.track_axis = 'TRACK_Z'
+      track.up_axis = 'UP_Y'
+
+      # 4d. Saturn's Ring
+      if p["name"] == "Saturn":
+        bpy.ops.mesh.primitive_plane_add(size=8.5, location=(p["dist"], 0, 0))
+        ring = bpy.context.active_object
+        ring.name = "Saturn_Ring"
+        ring.parent = pivot
+        ring.rotation_euler[1] = math.radians(20)
+
+        ring_tex_path = os.path.join(BASE_DIR, "2k_saturn_ring_alpha.png")
+        if not os.path.exists(ring_tex_path):
+          ring_tex_path = os.path.join(BASE_DIR, "2k_saturn_ring_alpha.jpg")
+
+        ring_mat = create_ring_material("Saturn_Ring_Mat", ring_tex_path)
+        ring.data.materials.append(ring_mat)
+
+    # Assign camera tracking to Sun so it rotates around the center during the intro
+    target = bpy.data.objects.get("Sun")
+    if target and cam:
+      track = cam.constraints.get("Track To") or cam.constraints.new(type='TRACK_TO')
+      track.target = target
+      track.track_axis = 'TRACK_NEGATIVE_Z'
+      track.up_axis = 'UP_Y'
+
+    # ==========================================
+    # 5. LIGHTING & BACKGROUND
+    # ==========================================
+    bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
+    sun_light = bpy.context.active_object
+    sun_light.name = "Sun_Light"
+    sun_light.data.energy = 50000.0
+    sun_light.data.shadow_soft_size = 5.0
+
+    world = bpy.context.scene.world
+    if not world:
+      world = bpy.data.worlds.new("World")
+      bpy.context.scene.world = world
+
+    world.use_nodes = True
+    bg_nodes = world.node_tree.nodes
+    bg_links = world.node_tree.links
+    bg_nodes.clear()
+
+    node_env = bg_nodes.new('ShaderNodeTexEnvironment')
+    bg_tex_path = os.path.join(BASE_DIR, "2k_stars_milky_way.jpg")
+    if os.path.exists(bg_tex_path):
+      node_env.image = bpy.data.images.load(bg_tex_path)
+
+    node_bg_stars = bg_nodes.new('ShaderNodeBackground')
+    node_bg_dark = bg_nodes.new('ShaderNodeBackground')
+    node_bg_dark.inputs['Color'].default_value = (0.005, 0.005, 0.005, 1)
+
+    node_mix = bg_nodes.new('ShaderNodeMixShader')
+    node_light_path = bg_nodes.new('ShaderNodeLightPath')
+    node_out = bg_nodes.new('ShaderNodeOutputWorld')
+
+    bg_links.new(node_env.outputs['Color'], node_bg_stars.inputs['Color'])
+    bg_links.new(node_bg_dark.outputs['Background'], node_mix.inputs[1])
+    bg_links.new(node_bg_stars.outputs['Background'], node_mix.inputs[2])
+    bg_links.new(node_light_path.outputs['Is Camera Ray'], node_mix.inputs['Fac'])
+    bg_links.new(node_mix.outputs['Shader'], node_out.inputs['Surface'])
+    </textarea>
         <div class="script-actions" role="group" aria-label="Script actions">
           <button class="button button-secondary" type="button" id="copy-script">Copy</button>
           <button class="button button-primary" type="button" id="download-script">Download</button>

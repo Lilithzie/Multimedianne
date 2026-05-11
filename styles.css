@@ -1,29 +1,27 @@
 :root {
-  --bg: #07111f;
-  --bg-deep: #030813;
-  --panel: rgba(11, 24, 43, 0.82);
-  --panel-strong: rgba(9, 18, 34, 0.94);
-  --line: rgba(163, 194, 255, 0.16);
-  --text: #f7f4ea;
-  --muted: #b7c4df;
-  --accent: #f6c56c;
-  --accent-soft: #89c8ff;
-  --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
-  --header-bg: rgba(6, 14, 28, 0.7);
-  --panel-top: rgba(16, 33, 61, 0.6);
-  --panel-bottom: rgba(5, 12, 24, 0.9);
-  --card-top: rgba(12, 24, 44, 0.8);
-  --card-bottom: rgba(7, 14, 26, 0.95);
+  --bg: #eaf2ff;
+  --bg-deep: #dfe9ff;
+  --panel: rgba(255, 252, 246, 0.86);
+  --panel-strong: rgba(255, 248, 238, 0.94);
+  --line: rgba(157, 197, 240, 0.26);
+  --text: #223047;
+  --muted: #5a6c89;
+  --accent: #ffc98b;
+  --accent-soft: #9ad9ff;
+  --shadow: 0 24px 60px rgba(91, 121, 168, 0.18);
+  --header-bg: rgba(250, 248, 255, 0.78);
+  --panel-top: rgba(255, 255, 255, 0.78);
+  --panel-bottom: rgba(244, 248, 255, 0.92);
+  --card-top: rgba(255, 255, 255, 0.9);
+  --card-bottom: rgba(241, 246, 255, 0.97);
   --body-background:
-    radial-gradient(circle at top, rgba(34, 75, 149, 0.28), transparent 32%),
-    radial-gradient(circle at 80% 20%, rgba(246, 197, 108, 0.12), transparent 18%),
-    linear-gradient(180deg, #091425 0%, #040914 65%, #02050d 100%);
+    radial-gradient(circle at top, rgba(168, 206, 255, 0.45), transparent 38%),
+    radial-gradient(circle at 80% 18%, rgba(255, 214, 168, 0.35), transparent 26%),
+    linear-gradient(180deg, #f7faff 0%, #eef5ff 58%, #eaf1ff 100%);
   --body-overlay: none;
   --body-overlay-opacity: 0.8;
   --body-vignette:
-    radial-gradient(circle at center, transparent 0, transparent 58%, rgba(2, 5, 13, 0.72) 100%);
-
-
+    radial-gradient(circle at center, transparent 0, transparent 60%, rgba(221, 233, 255, 0.55) 100%);
 }
 
 * {
@@ -144,32 +142,40 @@ body::after {
   --card-top: rgba(12, 24, 44, 0.8);
   --card-bottom: rgba(7, 14, 26, 0.95);
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  --body-background:
+    radial-gradient(circle at top, rgba(34, 75, 149, 0.28), transparent 32%),
+    radial-gradient(circle at 80% 20%, rgba(246, 197, 108, 0.12), transparent 18%),
+    linear-gradient(180deg, #091425 0%, #040914 65%, #02050d 100%);
+  --body-overlay: none;
+  --body-overlay-opacity: 0.8;
+  --body-vignette:
+    radial-gradient(circle at center, transparent 0, transparent 58%, rgba(2, 5, 13, 0.72) 100%);
 }
 
 .page-rotoscoping {
-  --text: #fceef5;
-  --muted: #d6b9ca;
-  --accent: #ff7eaa;
-  --accent-soft: #ffb3c8;
-  --line: rgba(255, 136, 175, 0.18);
-  --panel: rgba(34, 10, 26, 0.84);
-  --panel-strong: rgba(26, 8, 20, 0.95);
-  --header-bg: rgba(27, 7, 18, 0.72);
-  --panel-top: rgba(76, 16, 46, 0.45);
-  --panel-bottom: rgba(15, 5, 13, 0.94);
-  --card-top: rgba(56, 15, 36, 0.78);
-  --card-bottom: rgba(19, 6, 16, 0.98);
-  --shadow: 0 26px 68px rgba(0, 0, 0, 0.48);
+  --text: #1f2c2a;
+  --muted: #4d6f6a;
+  --accent: #ffb347;
+  --accent-soft: #72d9c7;
+  --line: rgba(114, 217, 199, 0.32);
+  --panel: rgba(255, 252, 244, 0.82);
+  --panel-strong: rgba(255, 248, 232, 0.94);
+  --header-bg: rgba(255, 249, 235, 0.78);
+  --panel-top: rgba(255, 255, 255, 0.72);
+  --panel-bottom: rgba(255, 242, 222, 0.9);
+  --card-top: rgba(255, 255, 255, 0.9);
+  --card-bottom: rgba(255, 241, 220, 0.96);
+  --shadow: 0 24px 58px rgba(255, 179, 71, 0.18);
   --body-background:
-    radial-gradient(circle at 18% 20%, rgba(255, 110, 153, 0.18), transparent 22%),
-    radial-gradient(circle at 82% 18%, rgba(183, 50, 96, 0.18), transparent 18%),
-    radial-gradient(circle at 50% 78%, rgba(255, 182, 208, 0.08), transparent 28%),
-    linear-gradient(180deg, #150713 0%, #0d0410 42%, #050207 100%);
+    radial-gradient(circle at 14% 16%, rgba(255, 233, 160, 0.7), transparent 30%),
+    radial-gradient(circle at 85% 18%, rgba(120, 220, 201, 0.65), transparent 26%),
+    radial-gradient(circle at 50% 72%, rgba(255, 200, 156, 0.55), transparent 30%),
+    linear-gradient(180deg, #fffdf6 0%, #f7fff9 48%, #fff3e1 100%);
   --body-overlay:
-    linear-gradient(120deg, transparent 0 24%, rgba(255, 139, 175, 0.04) 24% 26%, transparent 26% 50%, rgba(255, 139, 175, 0.03) 50% 52%, transparent 52% 100%);
-  --body-overlay-opacity: 1;
+    linear-gradient(120deg, transparent 0 26%, rgba(255, 212, 126, 0.14) 26% 28%, transparent 28% 52%, rgba(124, 232, 210, 0.12) 52% 54%, transparent 54% 100%);
+  --body-overlay-opacity: 0.9;
   --body-vignette:
-    radial-gradient(circle at center, transparent 0, transparent 46%, rgba(0, 0, 0, 0.58) 100%);
+    radial-gradient(circle at center, transparent 0, transparent 58%, rgba(255, 237, 210, 0.4) 100%);
 }
 
 .site-shell {
@@ -659,7 +665,27 @@ main {
   background: color-mix(in srgb, var(--panel-strong) 62%, transparent);
   color: var(--text);
   font: 500 0.95rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  resize: vertical;
+  max-height: 360px;
+  overflow: auto;
+  resize: none;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent-soft) 70%, transparent)
+    color-mix(in srgb, var(--panel) 75%, transparent);
+}
+
+.script-textarea::-webkit-scrollbar {
+  width: 10px;
+}
+
+.script-textarea::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  border-radius: 999px;
+}
+
+.script-textarea::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--panel) 90%, transparent);
 }
 
 .script-textarea:focus-visible {
