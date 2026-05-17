@@ -45,27 +45,10 @@ const revealTargets = document.querySelectorAll(
 );
 
 if (revealTargets.length) {
-  revealTargets.forEach((element, index) => {
-    element.classList.add('reveal');
-    element.style.transitionDelay = `${Math.min(index * 0.05, 0.4)}s`;
+  revealTargets.forEach((element) => {
+    element.classList.remove('reveal', 'is-visible');
+    element.style.transitionDelay = '';
   });
-
-  const observer = new IntersectionObserver(
-    (entries, io) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          io.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      rootMargin: '0px 0px -10% 0px',
-      threshold: 0.12,
-    }
-  );
-
-  revealTargets.forEach((element) => observer.observe(element));
 }
 
 const hashLinks = document.querySelectorAll('a[href^="#"]');
@@ -253,6 +236,8 @@ if (scriptCard) {
   const textarea = scriptCard.querySelector('#script-snippet');
   const copyButton = scriptCard.querySelector('#copy-script');
   const downloadButton = scriptCard.querySelector('#download-script');
+  let copyStatusTimeout = null;
+  const originalCopyLabel = copyButton?.textContent ?? 'Copy';
 
   const getText = () => (textarea && 'value' in textarea ? String(textarea.value ?? '') : '');
 
@@ -262,14 +247,12 @@ if (scriptCard) {
     }
 
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
-
-    if (textarea && typeof textarea.select === 'function') {
-      textarea.focus();
-      textarea.select();
-      document.execCommand('copy');
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+        // no-op
+      }
     }
   };
 
@@ -285,13 +268,30 @@ if (scriptCard) {
     URL.revokeObjectURL(url);
   };
 
+  const setCopyButtonLabel = (message) => {
+    if (!copyButton) {
+      return;
+    }
+
+    copyButton.textContent = message;
+    copyButton.classList.add('is-copied');
+
+    if (copyStatusTimeout) {
+      window.clearTimeout(copyStatusTimeout);
+    }
+
+    copyStatusTimeout = window.setTimeout(() => {
+      copyButton.textContent = originalCopyLabel;
+      copyButton.classList.remove('is-copied');
+    }, 1600);
+  };
+
   if (copyButton) {
     copyButton.addEventListener('click', async () => {
-      try {
-        await copyToClipboard(getText());
-      } catch {
-        // no-op
-      }
+      setCopyButtonLabel('Copied!');
+      copyToClipboard(getText()).catch(() => {
+        setCopyButtonLabel('Copy failed');
+      });
     });
   }
 

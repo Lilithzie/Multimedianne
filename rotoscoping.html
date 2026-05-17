@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rotoscoping | Multimedia and Authoring</title>
-  <meta name="description" content="A rotoscoping project inspired by ILLIT's dance performance for Jellyous, documenting visual direction, creative process, and weekly progress outputs.">
+  <meta name="description" content="A rotoscoping project inspired by Yeji's dance cover of River, documenting visual direction, creative process, and weekly progress outputs.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -36,51 +36,32 @@
       <section class="page-intro">
         <h1>Rotoscoping</h1>
         <p class="lead">
-          This rotoscoping project is based on the dance performance video for <em>Jellyous</em> by ILLIT,
-          using traced motion and stylized frames to highlight the choreography's crisp timing, playful energy,
-          and expressive formations.
+          This rotoscoping project is based on Yeji's dance cover of <em>River</em>,
+          using traced motion and stylized frames to highlight the choreography's precision, control,
+          and expressive flow.
         </p>
       </section>
 
-      <section class="panel">
-        <div class="section-heading">
-          <p class="eyebrow">Creative Focus</p>
-        </div>
-        <div class="card-grid">
-          <article class="feature-card">
-            <p class="card-label">Mood</p>
-            <h3>Bright, cheeky, and pop-forward</h3>
-            <p>The visual direction mirrors the song's upbeat attitude and the light, confident mood of the dance.</p>
-          </article>
-          <article class="feature-card">
-            <p class="card-label">Motion</p>
-            <h3>Choreography-first motion</h3>
-            <p>Every traced beat follows the dancers' timing, making the final animation feel rhythmic and clean.</p>
-          </article>
-          <article class="feature-card">
-            <p class="card-label">Style</p>
-            <h3>Clean lines with energetic accents</h3>
-            <p>Bold silhouettes and color pops keep attention on shapes, sync, and the playful performance.</p>
-          </article>
-        </div>
-      </section>
+   
 
       <section class="content-grid roto-media" aria-label="Reference and weekly progress">
         <article class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Reference Video</p>
-            <h2>Dance Performance Video Used</h2>
+          <div class="media-intro">
+            <div class="section-heading">
+              <p class="eyebrow">Reference Video</p>
+              <h2>Dance Performance Video Used</h2>
+            </div>
+            <p class="disclaimer">
+              <strong>Disclaimer:</strong> The embedded reference video is owned by its respective rights holders.
+              This page is for educational/portfolio demonstration only and does not claim ownership of the original
+              content.
+            </p>
           </div>
-          <p class="disclaimer">
-            <strong>Disclaimer:</strong> The embedded reference video is owned by its respective rights holders.
-            This page is for educational/portfolio demonstration only and does not claim ownership of the original
-            content.
-          </p>
           <div class="video-showcase">
             <div class="video-frame">
               <iframe
-                src="https://www.youtube.com/embed/OgM3C1q11D0"
-                title="ILLIT - Jellyous Dance Performance (Reference)"
+                src="https://www.youtube.com/embed/tnMFp53wrRg"
+                title="Yeji - River Dance Cover (Reference)"
                 loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen></iframe>
@@ -89,16 +70,20 @@
         </article>
 
         <article class="panel">
-          <div class="section-heading">
-            <p class="eyebrow">Weekly Progress</p>
-            <h2>Weeks of Development</h2>
-          </div>
+          <div class="media-intro">
+            <div class="section-heading">
+              <p class="eyebrow">Weekly Progress</p>
+              <h2>Weeks of Development</h2>
+            </div>
             <p class="lead" style="text-align: justify; font-size: 18px;">
-             Each video consists of a few seconds of rotoscoped footage, showing the development of the project over time. You can navigate through the weeks using the arrows on either side of the carousel.
+              Each video consists of a few seconds of rotoscoped footage, showing the development of the project over time. You can navigate through the weeks using the arrows on either side of the carousel.
             </p>
+          </div>
           <div class="weekly-shell" aria-label="Weekly progress carousel">
-            <button class="button button-secondary weekly-nav weekly-nav-prev" type="button" data-weekly-nav="prev" aria-label="Previous week">&lt;</button>
-            <button class="button button-secondary weekly-nav weekly-nav-next" type="button" data-weekly-nav="next" aria-label="Next week">&gt;</button>
+            <div class="weekly-controls" aria-label="Weekly carousel controls">
+              <button class="button button-secondary weekly-nav" type="button" data-weekly-nav="prev" aria-label="Previous week">&lt;</button>
+              <button class="button button-secondary weekly-nav" type="button" data-weekly-nav="next" aria-label="Next week">&gt;</button>
+            </div>
 
             <div class="weekly-viewport" id="weekly-carousel">
               <div class="weekly-track">
@@ -106,7 +91,7 @@
                   <p class="card-label">Week 1</p>
                   <div class="video-frame">
                     <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_1"
+                      src="https://www.youtube.com/watch?v=CzZu6GtrBuI"
                       title="Week 1 Progress Video"
                       loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -257,6 +242,10 @@
         </div>
       </section>
     </main>
+    <footer class="site-footer">
+      <p>For Academic Purpose Only</p>
+      <p>© 2026 Julianne S. Tumpap | BSIT - NS - 2A | Technological University of the Philippines - Taguig</p>
+    </footer>
   </div>
   <script src="script.js" defer></script>
 </body>
