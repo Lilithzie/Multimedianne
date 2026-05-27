@@ -1,201 +1,124 @@
 function initPlanets() {
-  if (typeof THREE === 'undefined') {
-    requestAnimationFrame(initPlanets);
-    return;
-  }
-
-  const planetTextures = {
-    Mercury: 'Planet Textures/2k_mercury.jpg',
-    Venus: 'Planet Textures/2k_venus_surface.jpg',
-    Earth: 'Planet Textures/2k_earth_daymap.jpg',
-    Mars: 'Planet Textures/2k_mars.jpg',
-    Jupiter: 'Planet Textures/2k_jupiter.jpg',
-    Saturn: 'Planet Textures/2k_saturn.jpg',
-    Uranus: 'Planet Textures/2k_uranus.jpg',
-    Neptune: 'Planet Textures/2k_neptune.jpg',
+  const planetVideos = {
+    Mercury: 'Planet Renders/Mercury.mp4',
+    Venus: 'Planet Renders/Venus.mp4',
+    Earth: 'Planet Renders/Earth.mp4',
+    Mars: 'Planet Renders/Mars.mp4',
+    Jupiter: 'Planet Renders/Jupiter.mp4',
+    Saturn: 'Planet Renders/Saturn.mp4',
+    Uranus: 'Planet Renders/Uranus.mp4',
+    Neptune: 'Planet Renders/Neptune.mp4',
   };
-
-  const planetModels = {
-    Mercury: 'Planet Models/Mercury.glb',
-    Venus: 'Planet Models/Venus.glb',
-    Earth: 'Planet Models/Earth.glb',
-    Mars: 'Planet Models/Mars.glb',
-    Jupiter: 'Planet Models/Jupiter.glb',
-    Saturn: 'Planet Models/Saturn.glb',
-    Uranus: 'Planet Models/Uranus.glb',
-    Neptune: 'Planet Models/Neptune.glb',
-  };
-
-  const textureLoader = new THREE.TextureLoader();
-  const gltfLoader = typeof THREE.GLTFLoader !== 'undefined' ? new THREE.GLTFLoader() : null;
-  const planetStates = {};
 
   const orbitRenders = document.querySelectorAll('.orbit-render[data-render]');
 
   orbitRenders.forEach((container) => {
     const planetName = container.getAttribute('data-render');
-    const canvas = container.querySelector('canvas');
+    const videoPath = planetVideos[planetName];
 
-    if (!canvas) return;
+    if (!videoPath) return;
 
-    const width = container.offsetWidth || 220;
-    const height = container.offsetHeight || 220;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // clear any existing children (canvas, placeholders)
+    container.innerHTML = '';
 
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = width + 'px';
-    canvas.style.height = height + 'px';
+    const video = document.createElement('video');
+    video.src = videoPath;
+    video.loop = true;
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.controls = false;
+    video.style.width = '100%';
+    video.style.height = '100%';
+    video.style.objectFit = 'cover';
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.z = 1.5;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(dpr);
-    renderer.setSize(width, height, false);
-    renderer.setClearColor(0x000000, 0);
-    renderer.outputEncoding = THREE.sRGBEncoding;
-
-    const lightPreset = planetName === 'Saturn'
-      ? { ambient: 0.35, hemi: 0.22, directional: 0.5 }
-      : { ambient: 0.55, hemi: 0.35, directional: 0.65 };
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, lightPreset.ambient);
-    scene.add(ambientLight);
-
-    const hemiLight = new THREE.HemisphereLight(0xf3f7ff, 0x101826, lightPreset.hemi);
-    scene.add(hemiLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xf7fbff, lightPreset.directional);
-    directionalLight.position.set(5, 3, 5);
-    scene.add(directionalLight);
-
-    const geometry = new THREE.SphereGeometry(1, 128, 128);
-    let sphere = null;
-    let model = null;
-    let animationId = null;
-
-    const modelPath = planetModels[planetName];
-    const texturePath = planetTextures[planetName];
-
-    const startAnimation = () => {
-      const animate = () => {
-        animationId = requestAnimationFrame(animate);
-        if (model) {
-          model.rotation.y += 0.0045;
-        }
-        if (sphere) {
-          sphere.rotation.y += 0.005;
-        }
-        renderer.render(scene, camera);
-      };
-      animate();
-    };
-
-    const loadTextureSphere = () => {
-      if (!texturePath) {
-        return;
-      }
-
-      textureLoader.load(
-        texturePath,
-        (texture) => {
-          texture.encoding = THREE.sRGBEncoding;
-          const material = new THREE.MeshStandardMaterial({
-            map: texture,
-            roughness: 0.95,
-            metalness: 0,
-          });
-          sphere = new THREE.Mesh(geometry, material);
-          scene.add(sphere);
-          startAnimation();
-        },
-        undefined,
-        (error) => {
-          console.error('Failed to load texture:', texturePath, error);
-        }
-      );
-    };
-
-    if (modelPath && gltfLoader) {
-      gltfLoader.load(
-        encodeURI(modelPath),
-        (gltf) => {
-          model = gltf.scene;
-
-          const bounds = new THREE.Box3().setFromObject(model);
-          const size = bounds.getSize(new THREE.Vector3());
-          const maxAxis = Math.max(size.x, size.y, size.z) || 1;
-          const scale = 1 / maxAxis;
-          model.scale.setScalar(scale);
-
-          bounds.setFromObject(model);
-          const center = bounds.getCenter(new THREE.Vector3());
-          model.position.sub(center);
-
-          scene.add(model);
-          startAnimation();
-        },
-        undefined,
-        (error) => {
-          console.error('Failed to load model:', modelPath, error);
-          loadTextureSphere();
-        }
-      );
-    } else {
-      loadTextureSphere();
+    // disable Picture-in-Picture and related native UI, then insert
+    try {
+      video.disablePictureInPicture = true;
+    } catch (e) {}
+    try {
+      video.webkitDisablePictureInPicture = true;
+    } catch (e) {}
+    if ('controlsList' in video) {
+      try { video.controlsList = 'nodownload noremoteplayback'; } catch (e) {}
     }
 
-    planetStates[planetName] = {
-      scene,
-      camera,
-      renderer,
-      canvas,
-      animationId,
-      sphere,
-      model,
-    };
-  });
+    container.appendChild(video);
 
-  const handleResize = () => {
-    orbitRenders.forEach((container) => {
-      const planetName = container.getAttribute('data-render');
-      const state = planetStates[planetName];
+    // ensure autoplay on supported browsers and prevent native context menu
+    video.addEventListener('canplay', () => {
+      video.play().catch(() => {});
+    }, { once: true });
 
-      if (!state) return;
-
-      const width = container.offsetWidth || 220;
-      const height = container.offsetHeight || 220;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-      state.canvas.width = width * dpr;
-      state.canvas.height = height * dpr;
-      state.canvas.style.width = width + 'px';
-      state.canvas.style.height = height + 'px';
-
-      state.renderer.setPixelRatio(dpr);
-      state.renderer.setSize(width, height, false);
-
-      state.camera.aspect = width / height;
-      state.camera.updateProjectionMatrix();
+    // defensive: try to prevent or immediately exit Picture-in-Picture if activated
+    video.addEventListener('enterpictureinpicture', (e) => {
+      try {
+        if (document.exitPictureInPicture) document.exitPictureInPicture().catch(() => {});
+      } catch (err) {}
+      try { e.preventDefault && e.preventDefault(); } catch (err) {}
     });
-  };
 
-  window.addEventListener('resize', handleResize);
-
-  window.addEventListener('beforeunload', () => {
-    Object.values(planetStates).forEach((state) => {
-      if (state.animationId) {
-        cancelAnimationFrame(state.animationId);
-      }
-      state.renderer.dispose();
-    });
+    video.addEventListener('error', () => console.error('Video failed to load:', videoPath));
+    video.addEventListener('contextmenu', (e) => e.preventDefault());
   });
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPlanets);
+  document.addEventListener('DOMContentLoaded', () => {
+    initPlanets();
+    initYouTubeAutoplay();
+  });
 } else {
   initPlanets();
+  initYouTubeAutoplay();
+}
+
+function initYouTubeAutoplay() {
+  const iframes = Array.from(document.querySelectorAll('iframe'))
+    .filter(f => f.src && (f.src.indexOf('youtube.com/embed') !== -1 || f.src.indexOf('youtube-nocookie.com/embed') !== -1));
+
+  if (!iframes.length) return;
+
+  iframes.forEach((iframe) => {
+    // store original src
+    if (!iframe.dataset.origSrc) iframe.dataset.origSrc = iframe.src;
+    // ensure iframe allows autoplay and related features
+    try {
+      const allow = (iframe.getAttribute('allow') || '').trim();
+      const needed = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      if (!allow || !allow.includes('autoplay')) {
+        iframe.setAttribute('allow', (allow ? allow + '; ' : '') + needed);
+      }
+    } catch (e) {}
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const f = entry.target;
+      const orig = f.dataset.origSrc || f.src;
+      try {
+        const url = new URL(orig, window.location.href);
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          url.searchParams.set('autoplay', '1');
+          url.searchParams.set('mute', '1');
+          f.src = url.toString();
+        } else {
+          url.searchParams.delete('autoplay');
+          url.searchParams.delete('mute');
+          f.src = url.toString();
+        }
+      } catch (err) {
+        // fallback: append query string
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (orig.indexOf('?') === -1) f.src = orig + '?autoplay=1&mute=1';
+          else f.src = orig + '&autoplay=1&mute=1';
+        } else {
+          f.src = orig;
+        }
+      }
+    });
+  }, { threshold: [0.5] });
+
+  iframes.forEach((f) => observer.observe(f));
 }
