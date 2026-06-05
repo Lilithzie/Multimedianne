@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style>
+  html, body {
+    cursor: none !important;
+  }
+  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Solar System | Multimedia and Authoring</title>
@@ -11,9 +16,15 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js" defer></script>
+  <script src="custom-cursor.js" defer></script>
 </head>
 <body class="page-solar">
-  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div id="customCursor">
+    <div class="cursor-arrow"></div>
+    <div class="cursor-heart">♥</div>
+  </div>
+
   <div class="site-shell">
     <header class="site-header" id="site-header">
       <a class="brand" href="index.html">
