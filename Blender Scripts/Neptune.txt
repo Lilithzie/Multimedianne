@@ -1,0 +1,469 @@
+import bpy
+import math
+import os
+import random
+
+# ==========================================
+# 0. TARGET SELECTOR & SETTINGS
+# ==========================================
+# Change this name to isolate and render a specific planet.
+TARGET_PLANET = "Neptune" 
+
+# Adjust this to fix the "speeding up" optical illusion when zooming in.
+# 0.15 is great for close-ups. 1.0 is standard for wide shots.
+GLOBAL_TIME_SCALE = 0.15 
+
+# ==========================================
+# 1. SETUP & DATA
+# ==========================================
+
+BASE_DIR = r"C:\xampp\htdocs\Multimedianne\Planet Textures"
+MOON_DIR = r"C:\xampp\htdocs\Multimedianne\Moon Textures"
+
+ALL_PLANETS = [
+  {"name": "Sun",     "tex": "2k_sun.jpg",               "size": 5.0,  "orb_spd": 0.0,   "rot_spd": 0.5,  "moons": 0, "named_moons": []},
+  {"name": "Mercury", "tex": "2k_mercury.jpg",           "size": 0.3,  "orb_spd": 4.1,   "rot_spd": 0.1,  "moons": 0, "named_moons": []},
+  {"name": "Venus",   "tex": "2k_venus_surface.jpg",     "size": 0.7,  "orb_spd": 1.6,   "rot_spd": -0.1, "moons": 0, "named_moons": []},
+  {"name": "Earth",   "tex": "2k_earth_daymap.jpg",      "size": 0.8,  "orb_spd": 1.0,   "rot_spd": 2.0,  "moons": 1, "named_moons": [
+      {"name": "Moon", "tex": "2k_moon", "round": True}
+  ]},
+  {"name": "Mars",    "tex": "2k_mars.jpg",              "size": 0.4,  "orb_spd": 0.5,   "rot_spd": 1.9,  "moons": 2, "named_moons": [
+      {"name": "Deimos", "tex": "2k_deimos", "round": False},
+      {"name": "Phobos", "tex": "2k_phobos", "round": False}
+  ]},
+  {"name": "Jupiter", "tex": "2k_jupiter.jpg",           "size": 2.2,  "orb_spd": 0.08,  "rot_spd": 4.5,  "moons": 95, "named_moons": [
+      {"name": "Amalthea", "tex": "2k_amalthea", "round": False},
+      {"name": "Callisto", "tex": "2k_calisto", "round": True},
+      {"name": "Europa", "tex": "2k_europa", "round": True},
+      {"name": "Ganymede", "tex": "2k_ganymede", "round": True},
+      {"name": "Io", "tex": "2k_io", "round": True}
+  ]},
+  {"name": "Saturn",  "tex": "2k_saturn.jpg",            "size": 1.8,  "orb_spd": 0.03,  "rot_spd": 4.0,  "moons": 274, "named_moons": [
+      {"name": "Dione", "tex": "2k_dione", "round": True},
+      {"name": "Enceladus", "tex": "2k_enceladus", "round": True},
+      {"name": "Epimetheus", "tex": "2k_epimetheus", "round": False},
+      {"name": "Hyperion", "tex": "2k_hyperion", "round": False},
+      {"name": "Janus", "tex": "2k_janus", "round": False},
+      {"name": "Iapetus", "tex": "2k_lapetus", "round": True},
+      {"name": "Mimas", "tex": "2k_mimas", "round": True},
+      {"name": "Phoebe", "tex": "2k_phoebe", "round": False},
+      {"name": "Rhea", "tex": "2k_rhea", "round": True},
+      {"name": "Tethys", "tex": "2k_tethys", "round": True},
+      {"name": "Titan", "tex": "2k_titan", "round": True}
+  ]},
+  {"name": "Uranus",  "tex": "2k_uranus.jpg",            "size": 1.2,  "orb_spd": 0.01,  "rot_spd": -2.5, "moons": 28, "named_moons": [
+      {"name": "Ariel", "tex": "2k_ariel", "round": True},
+      {"name": "Miranda", "tex": "2k_miranda", "round": True},
+      {"name": "Oberon", "tex": "2k_oberon", "round": True},
+      {"name": "Titania", "tex": "2k_titania", "round": True},
+      {"name": "Umbriel", "tex": "2k_umbriel", "round": True}
+  ]},
+  {"name": "Neptune", "tex": "2k_neptune.jpg",           "size": 1.1,  "orb_spd": 0.006, "rot_spd": 2.8,  "moons": 16, "named_moons": [
+      {"name": "Galatea", "tex": "2k_galatea", "round": False},
+      {"name": "Triton", "tex": "2k_triton", "round": True}
+  ]},
+  {"name": "Pluto",   "tex": "2k_pluto.jpg",             "size": 0.15, "orb_spd": 0.004, "rot_spd": -0.3, "moons": 5, "named_moons": [
+      {"name": "Charon", "tex": "2k_charon", "round": True},
+      {"name": "Nix", "tex": "2k_nix", "round": False},
+      {"name": "Styx", "tex": "2k_styx", "round": False}
+  ]}
+]
+
+# FILTER FOR ISOLATED RENDER
+PLANETS = [p for p in ALL_PLANETS if p["name"] == TARGET_PLANET]
+
+if not PLANETS:
+    raise ValueError(f"Planet '{TARGET_PLANET}' not found. Please check spelling.")
+
+# ==========================================
+# 1.5 PROCEDURAL SCALE CALCULATOR
+# ==========================================
+for p in PLANETS:
+    is_sun = (p["name"] == "Sun")
+    sys_radius = p["size"]
+    
+    if p["name"] == "Saturn": sys_radius = max(sys_radius, 4.5)
+    if p["name"] == "Earth": sys_radius = max(sys_radius, p["size"] + 0.3)
+        
+    moon_orbits = []
+    curr_m_dist = sys_radius + random.uniform(0.5, 1.0)
+    
+    for m in range(p["moons"]):
+        is_named = m < len(p["named_moons"])
+        
+        # DETERMINISTIC SEEDING: Lock the math based on the moon's name
+        if is_named:
+            m_name_seed = p["named_moons"][m]["name"]
+            moon_rng = random.Random(m_name_seed)
+            m_size = moon_rng.uniform(0.04, 0.08)
+        else:
+            m_name_seed = None
+            moon_rng = random.Random() # Pure chaos for unnamed rocks
+            m_size = moon_rng.uniform(0.015, 0.035)
+        
+        orbit_r = curr_m_dist + m_size
+        moon_orbits.append({"size": m_size, "dist": orbit_r, "seed": m_name_seed})
+        
+        curr_m_dist = orbit_r + m_size + moon_rng.uniform(0.2, 0.6) * (1.0 + p["size"] * 0.25)
+    
+    if p["moons"] > 0:
+        sys_radius = curr_m_dist + 1.0 
+        
+    p["system_radius"] = sys_radius
+    p["computed_moon_data"] = moon_orbits
+    p["dist"] = 0.0
+
+# Cleanup workspace
+for window in bpy.context.window_manager.windows:
+  for area in window.screen.areas:
+    if area.type == 'VIEW_3D':
+      for space in area.spaces:
+        if space.type == 'VIEW_3D':
+          space.overlay.show_relationship_lines = False
+
+bpy.app.handlers.frame_change_pre.clear()
+
+objects_to_delete = []
+for obj in bpy.data.objects:
+    name = obj.name
+    if obj.type == 'CAMERA' and name == "Camera": continue 
+        
+    if (any(name.startswith(p["name"]) for p in ALL_PLANETS) or
+        any(sub in name for sub in ["Orbit", "Pivot", "Text", "Saturn_Ring", "Camera_Focus", 
+                                    "Camera_Rig", "Preview_Light", "Sun_Light", "Asteroid", 
+                                    "Moon", "Earth_", "HUD", "Rocket"]) or 
+        obj.type == 'FONT'):
+        objects_to_delete.append(obj)
+        
+for obj in objects_to_delete:
+    bpy.data.objects.remove(obj, do_unlink=True)
+
+
+# ==========================================
+# 2. HELPER FUNCTIONS & MATERIALS
+# ==========================================
+def get_moon_tex_path(planet_name, tex_base_name):
+  path_jpg = os.path.join(MOON_DIR, planet_name, tex_base_name + ".jpg")
+  path_png = os.path.join(MOON_DIR, planet_name, tex_base_name + ".png")
+  if os.path.exists(path_jpg): return path_jpg
+  if os.path.exists(path_png): return path_png
+  return path_jpg
+
+def create_material(name, tex_path, is_sun=False):
+  mat = bpy.data.materials.new(name + "_Mat")
+  mat.use_nodes = True
+  nodes, links = mat.node_tree.nodes, mat.node_tree.links
+  nodes.clear()
+
+  out = nodes.new('ShaderNodeOutputMaterial')
+  bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+  tex = nodes.new('ShaderNodeTexImage')
+
+  mapping = nodes.new('ShaderNodeMapping')
+  coord = nodes.new('ShaderNodeTexCoord')
+  links.new(coord.outputs['UV'], mapping.inputs['Vector'])
+  links.new(mapping.outputs['Vector'], tex.inputs['Vector'])
+
+  if os.path.exists(tex_path): tex.image = bpy.data.images.load(tex_path)
+
+  if is_sun:
+    bsdf.inputs['Base Color'].default_value = (0, 0, 0, 1)
+    if 'Emission Strength' in bsdf.inputs: bsdf.inputs['Emission Strength'].default_value = 1.5
+    em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
+    links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
+  else:
+    links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+    if 'Roughness' in bsdf.inputs: bsdf.inputs['Roughness'].default_value = 0.9
+
+  links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+  return mat
+
+def create_ring_material(name, tex_path):
+  mat = bpy.data.materials.new(name)
+  mat.use_nodes = True
+  nodes, links = mat.node_tree.nodes, mat.node_tree.links
+  nodes.clear()
+
+  out = nodes.new('ShaderNodeOutputMaterial')
+  bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+  tex = nodes.new('ShaderNodeTexImage')
+  if os.path.exists(tex_path): tex.image = bpy.data.images.load(tex_path)
+
+  coord = nodes.new('ShaderNodeTexCoord')
+  sep = nodes.new('ShaderNodeSeparateXYZ')
+  comb = nodes.new('ShaderNodeCombineXYZ')
+  length = nodes.new('ShaderNodeVectorMath')
+  length.operation = 'LENGTH'
+
+  links.new(coord.outputs['Object'], sep.inputs['Vector'])
+  links.new(sep.outputs['X'], comb.inputs['X'])
+  links.new(sep.outputs['Y'], comb.inputs['Y'])
+  links.new(comb.outputs['Vector'], length.inputs[0])
+
+  map_range = nodes.new('ShaderNodeMapRange')
+  map_range.inputs[1].default_value = 2.0
+  map_range.inputs[2].default_value = 4.25
+
+  uv_comb = nodes.new('ShaderNodeCombineXYZ')
+  uv_comb.inputs['Y'].default_value = 0.5
+
+  links.new(length.outputs['Value'], map_range.inputs['Value'])
+  links.new(map_range.outputs['Result'], uv_comb.inputs['X'])
+  links.new(uv_comb.outputs['Vector'], tex.inputs['Vector'])
+
+  links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+  links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
+  em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
+  links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
+  if 'Emission Strength' in bsdf.inputs: bsdf.inputs['Emission Strength'].default_value = 0.15
+
+  links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+  return mat
+
+def animate_infinite_spin(obj, speed_multiplier, phase_offset=0.0):
+  if speed_multiplier == 0: return
+  obj.rotation_mode = 'XYZ'
+  driver_speed = (math.pi * speed_multiplier * GLOBAL_TIME_SCALE) / 60.0
+  driver = obj.driver_add("rotation_euler", 2)
+  driver.driver.expression = f"(frame * {driver_speed}) + {phase_offset}"
+
+def get_framing_dist(radius, fov_rad, margin=1.05, min_radius=0.15):
+    r = max(radius, min_radius)
+    return (r / math.sin(fov_rad / 2.0)) * margin
+
+generic_moon_mat = bpy.data.materials.new("Generic_Moon_Mat")
+generic_moon_mat.use_nodes = True
+m_nodes = generic_moon_mat.node_tree.nodes
+m_links = generic_moon_mat.node_tree.links
+m_nodes.clear()
+m_out = m_nodes.new('ShaderNodeOutputMaterial')
+m_bsdf = m_nodes.new('ShaderNodeBsdfPrincipled')
+m_bsdf.inputs['Base Color'].default_value = (0.5, 0.5, 0.52, 1) 
+if 'Roughness' in m_bsdf.inputs: m_bsdf.inputs['Roughness'].default_value = 1.0
+m_links.new(m_bsdf.outputs['BSDF'], m_out.inputs['Surface'])
+
+displace_tex = bpy.data.textures.new("Rock_Displace", type='CLOUDS')
+displace_tex.noise_scale = 0.7
+
+# ==========================================
+# 3. CAMERA SETUP
+# ==========================================
+cam = bpy.data.objects.get("Camera")
+if not cam:
+  bpy.ops.object.camera_add()
+  cam = bpy.context.active_object
+  cam.name = "Camera"
+
+CAM_FOV = math.radians(40) 
+cam.data.angle = CAM_FOV
+cam.data.clip_end = 35000.0
+bpy.context.scene.camera = cam
+cam.animation_data_clear()
+cam.constraints.clear()
+
+sys_dist_for_cam = 0.5 # Fallback
+
+# ==========================================
+# 4. BUILD THE ISOLATED PLANET & MOONS
+# ==========================================
+for p in PLANETS:
+  is_sun = (p["name"] == "Sun")
+  tex_full_path = os.path.join(BASE_DIR, p["tex"])
+  planet_x = p["dist"] # This is 0.0
+
+  if not is_sun:
+    bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+    pivot = bpy.context.active_object
+    pivot.name = p["name"] + "_Pivot"
+    pivot.hide_viewport = True
+    animate_infinite_spin(pivot, p["orb_spd"])
+
+  bpy.ops.mesh.primitive_uv_sphere_add(
+    segments=128 if is_sun else 64,
+    ring_count=64 if is_sun else 32,
+    radius=p["size"],
+    location=(planet_x, 0, 0)
+  )
+  body = bpy.context.active_object
+  body.name = p["name"]
+  bpy.ops.object.shade_smooth()
+
+  if is_sun: body.visible_shadow = False
+
+  mat = create_material(p["name"], tex_full_path, is_sun)
+  body.data.materials.append(mat)
+  animate_infinite_spin(body, p["rot_spd"])
+
+  if not is_sun: body.parent = pivot
+
+  sys_dist_for_cam = get_framing_dist(p["system_radius"], CAM_FOV, margin=1.1)
+
+  # Saturn's Ring
+  if p["name"] == "Saturn":
+    bpy.ops.mesh.primitive_plane_add(size=8.5, location=(planet_x, 0, 0))
+    ring = bpy.context.active_object
+    ring.name = "Saturn_Ring"
+    ring.parent = pivot
+    ring.rotation_euler[1] = math.radians(20)
+    ring_tex_path = os.path.join(BASE_DIR, "2k_saturn_ring_alpha.png")
+    if not os.path.exists(ring_tex_path): ring_tex_path = os.path.join(BASE_DIR, "2k_saturn_ring_alpha.jpg")
+    ring.data.materials.append(create_ring_material("Saturn_Ring_Mat", ring_tex_path))
+
+  # MOONS 
+  if not is_sun and p["moons"] > 0:
+    for m in range(p["moons"]):
+      
+      moon_info = p["computed_moon_data"][m]
+      m_size = moon_info["size"]
+      m_dist = moon_info["dist"]
+      seed_val = moon_info["seed"]
+      
+      # Re-initialize the specific deterministic generator for this moon's coordinates
+      if seed_val:
+          moon_rng = random.Random(seed_val)
+          moon_data = p["named_moons"][m]
+          m_name = moon_data["name"]
+          is_round = moon_data["round"]
+          specific_tex_path = get_moon_tex_path(p["name"], moon_data["tex"])
+          m_mat = create_material(f"{p['name']}_{m_name}_Mat", specific_tex_path, False)
+      else:
+          moon_rng = random.Random()
+          m_name = f"Unnamed_Rock_{m}"
+          is_round = False 
+          m_mat = generic_moon_mat
+
+      bpy.ops.object.empty_add(type='PLAIN_AXES', location=(planet_x, 0, 0))
+      moon_pivot = bpy.context.active_object
+      moon_pivot.name = f"{p['name']}_Moon_{m_name}_Pivot"
+      moon_pivot.parent = pivot
+      moon_pivot.hide_viewport = True
+      
+      # Orbital Inclination & Phase Offset controlled by the moon's specific RNG
+      moon_pivot.rotation_euler[0] = math.radians(moon_rng.uniform(-15.0, 15.0))
+      moon_pivot.rotation_euler[1] = math.radians(moon_rng.uniform(-15.0, 15.0))
+      m_spd = moon_rng.uniform(2.0, 10.0) * moon_rng.choice([1, -1])
+      m_start_phase = moon_rng.uniform(0.0, math.pi * 2.0) 
+      animate_infinite_spin(moon_pivot, m_spd, phase_offset=m_start_phase)
+      
+      bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3 if is_round else 2, radius=m_size, location=(m_dist, 0, 0))
+      moon = bpy.context.active_object
+      moon.name = f"{p['name']}_Moon_{m_name}"
+      moon.parent = moon_pivot
+      moon.data.materials.append(m_mat)
+      bpy.ops.object.shade_smooth()
+      
+      if not is_round:
+          moon.scale = (moon_rng.uniform(0.6, 1.4), moon_rng.uniform(0.6, 1.4), moon_rng.uniform(0.6, 1.4))
+          mod = moon.modifiers.new(name="Displace", type='DISPLACE')
+          mod.texture = displace_tex
+          mod.strength = m_size * 0.5 
+      
+      # Axial Tilt controlled by the moon's specific RNG
+      moon.rotation_euler[0] = math.radians(moon_rng.uniform(-25.0, 25.0))
+      moon.rotation_euler[1] = math.radians(moon_rng.uniform(-25.0, 25.0))
+      
+      moon_spin_spd = moon_rng.uniform(1.0, 5.0) * moon_rng.choice([1, -1])
+      moon_spin_phase = moon_rng.uniform(0.0, math.pi * 2.0)
+      animate_infinite_spin(moon, moon_spin_spd, phase_offset=moon_spin_phase)
+
+
+# ==========================================
+# 5. LIGHTING & ENVIRONMENT
+# ==========================================
+bpy.ops.object.light_add(type='SUN', location=(0, 0, 0))
+preview_light = bpy.context.active_object
+preview_light.name = "Preview_Light"
+preview_light.data.energy = 3.0  
+preview_light.data.angle = math.radians(15)  
+preview_light.parent = cam
+
+scene = bpy.context.scene
+world = scene.world
+if not world:
+  world = bpy.data.worlds.new("World")
+  scene.world = world
+
+world.use_nodes = True
+bg_nodes = world.node_tree.nodes
+bg_links = world.node_tree.links
+bg_nodes.clear()
+
+node_env = bg_nodes.new('ShaderNodeTexEnvironment')
+bg_tex_path = os.path.join(BASE_DIR, "8k_stars_milky_way.jpg")
+if os.path.exists(bg_tex_path): node_env.image = bpy.data.images.load(bg_tex_path)
+
+node_bg_stars = bg_nodes.new('ShaderNodeBackground')
+node_bg_dark = bg_nodes.new('ShaderNodeBackground')
+node_bg_dark.inputs['Color'].default_value = (0.05, 0.05, 0.05, 1)
+
+node_mix = bg_nodes.new('ShaderNodeMixShader')
+node_light_path = bg_nodes.new('ShaderNodeLightPath')
+node_out = bg_nodes.new('ShaderNodeOutputWorld')
+
+bg_links.new(node_env.outputs['Color'], node_bg_stars.inputs['Color'])
+bg_links.new(node_bg_dark.outputs['Background'], node_mix.inputs[1])
+bg_links.new(node_bg_stars.outputs['Background'], node_mix.inputs[2])
+bg_links.new(node_light_path.outputs['Is Camera Ray'], node_mix.inputs['Fac'])
+bg_links.new(node_mix.outputs['Shader'], node_out.inputs['Surface'])
+
+scene.use_nodes = True
+is_blender_5 = hasattr(scene, "compositing_node_group")
+comp_tree = scene.compositing_node_group if is_blender_5 else scene.node_tree
+if not comp_tree and is_blender_5:
+    comp_tree = bpy.data.node_groups.new("Compositing_Tree", "CompositorNodeTree")
+    scene.compositing_node_group = comp_tree
+
+comp_tree.nodes.clear()
+rl_node = comp_tree.nodes.new('CompositorNodeRLayers')
+glare_glow = comp_tree.nodes.new('CompositorNodeGlare')
+glare_glow.location = (300, 0)
+
+if hasattr(glare_glow, 'glare_type'):
+    try: glare_glow.glare_type = 'BLOOM'
+    except TypeError:
+        try: glare_glow.glare_type = 'FOG_GLOW'
+        except Exception: pass
+if hasattr(glare_glow, 'threshold'): glare_glow.threshold = 2.0
+elif 'Threshold' in glare_glow.inputs: glare_glow.inputs['Threshold'].default_value = 2.0
+
+if is_blender_5:
+    comp_node = comp_tree.nodes.new('NodeGroupOutput')
+    comp_node.location = (600, 0)
+    if len(comp_node.inputs) == 0: comp_tree.interface.new_socket(name="Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+else:
+    comp_node = comp_tree.nodes.new('CompositorNodeComposite')
+    comp_node.location = (600, 0)
+
+if is_blender_5:
+    comp_tree.links.new(rl_node.outputs[0], glare_glow.inputs[0])
+    comp_tree.links.new(glare_glow.outputs[0], comp_node.inputs[0])
+else:
+    comp_tree.links.new(rl_node.outputs[0], glare_glow.inputs[0])
+    comp_tree.links.new(glare_glow.outputs[0], comp_node.inputs['Image'])
+
+for window in bpy.context.window_manager.windows:
+    for area in window.screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D' and hasattr(space.shading, 'use_compositor'): 
+                    space.shading.use_compositor = 'ALWAYS'
+
+# ==========================================
+# 6. DYNAMIC CAMERA TIMING
+# ==========================================
+TOTAL_FRAMES = 1800
+bpy.context.scene.frame_end = TOTAL_FRAMES
+
+bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+cam_focus = bpy.context.active_object
+cam_focus.name = "Camera_Focus"
+
+track = cam.constraints.new(type='TRACK_TO')
+track.target = cam_focus
+track.track_axis = 'TRACK_NEGATIVE_Z'
+track.up_axis = 'UP_Y'
+
+cam_focus.location = (0, 0, 0)
+cam.location = (0, -sys_dist_for_cam * 0.35, 0)
+
+bpy.context.view_layer.update()
