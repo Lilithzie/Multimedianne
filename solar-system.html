@@ -61,10 +61,10 @@
         <div class="hero-center">
           <div class="hero-eyebrow">✦ Built in Blender</div>
           <h1 class="hero-title" style="font-size: clamp(2.4rem,7vw,6rem);">
-            3D <span class="accent-word">Solar</span><br>System
+            <span class="accent-word">3D Solar System</span><br>
           </h1>
           <p class="hero-sub">
-            A scripted, cinematic tour of the solar system — every orbit, texture, and light driven by one Python file.
+            A scripted, cinematic tour of the solar system — every orbit, texture, and light created by Blender.
           </p>
           <div class="hero-cta-row">
             <a class="button button-primary" href="#planet-carousel">See the Planets</a>
@@ -73,8 +73,7 @@
         </div>
       </section>
 
-      <!-- ── Cinematic Overview Video ──────────────────────
-           Swap the src below for your second solar system video. -->
+      <!-- ── Cinematic Overview Video ──────────────────────-->
       <section class="panel" aria-label="Cinematic solar system overview">
         <div class="section-heading">
           <p class="eyebrow">Full Walkthrough</p>
@@ -222,7 +221,7 @@
           <h2>Planets &amp; Their Moons</h2>
         </div>
         <p class="lead" style="margin-top: 0.5rem;">
-          Wider renders showing each planet alongside its moons, plus Pluto.
+          Wider renders showing each planet alongside its moons.
         </p>
 
         <div class="orbit-carousel" id="moons-orbit-carousel"
@@ -267,14 +266,14 @@
       <section class="panel" id="process" aria-labelledby="process-heading">
         <div class="section-heading">
           <p class="eyebrow">Process</p>
-          <h2 id="process-heading">Empty scene to full system</h2>
+          <h2 id="process-heading">Steps in Creation</h2>
         </div>
 
         <div class="card-grid" style="margin-top: 1.2rem;">
 
           <article class="feature-card">
             <div class="step-figure">
-              <img src="Pictures/Steps/solar-step-1.jpg" alt="Scene setup step"
+              <img src="Pictures/Steps/solar-step-1.png" alt="Scene setup step"
                    data-lightbox loading="lazy">
             </div>
             <p class="card-label">Step 1</p>
@@ -284,17 +283,17 @@
 
           <article class="feature-card">
             <div class="step-figure">
-              <img src="Pictures/Steps/solar-step-2.jpg" alt="Modeling and texturing step"
+              <img src="Pictures/Steps/solar-step-2.png" alt="Modeling and texturing step"
                    data-lightbox loading="lazy">
             </div>
             <p class="card-label">Step 2</p>
-            <h3 style="font-size:1.25rem;">Model &amp; texture planets</h3>
-            <p>Every planet is a UV sphere with a Principled BSDF material.</p>
+            <h3 style="font-size:1.25rem;">Create and Model &amp;planets using scripts</h3>
+            <p>Every planet is created with help of scripts and patience.</p>
           </article>
 
           <article class="feature-card">
             <div class="step-figure">
-              <img src="Pictures/Steps/solar-step-3.jpg" alt="Lighting step"
+              <img src="Pictures/Steps/solar-step-3.png" alt="Lighting step"
                    data-lightbox loading="lazy">
             </div>
             <p class="card-label">Step 3</p>
@@ -309,12 +308,10 @@
       <section class="panel" id="scripts" aria-label="Blender Python scripts">
         <div class="section-heading">
           <p class="eyebrow">Script Library</p>
-          <h2>Copy or download any piece</h2>
+          <h2>All Scripts for the 3D planet models</h2>
         </div>
         <p class="lead" style="margin-top: 0.5rem;">
-          The full generator builds everything at once. Each card below is a small,
-          standalone script for just that one body.
-        </p>
+          Available scripts for download or copy. Run in Blender to try. ^ ^
 
         <!-- Replace the href below with your Google Drive folder/file link -->
         <a class="button button-secondary" href="https://drive.google.com/drive/folders/1dtUS2l1Gc1EseHEaNQJTdD6zQBHkthsn"
@@ -425,52 +422,6 @@ sun_light.name = "Sun_Light"
 sun_light.data.energy = 50000.0
 
 print("Solar system built successfully!")
-</textarea>
-          </div>
-
-          <div class="script-card" data-script-card data-script-filename="planet_sun.py">
-            <span class="script-card-status" data-script-status></span>
-            <span class="script-card-name">Sun</span>
-            <div class="script-card-actions">
-              <button class="script-card-btn" type="button" data-copy-script aria-label="Copy Sun script" title="Copy">
-                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-              </button>
-              <button class="script-card-btn" type="button" data-download-script aria-label="Download Sun script" title="Download">
-                <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-              </button>
-            </div>
-            <textarea data-script-source hidden>import bpy, os
-
-BASE_DIR = r"C:\xampp\htdocs\Multimedianne\Planet Textures"
-
-bpy.ops.mesh.primitive_uv_sphere_add(segments=128, ring_count=64, radius=5.0, location=(0, 0, 0))
-sun = bpy.context.active_object
-sun.name = "Sun"
-bpy.ops.object.shade_smooth()
-
-mat = bpy.data.materials.new("Sun_Mat")
-mat.use_nodes = True
-nodes, links = mat.node_tree.nodes, mat.node_tree.links
-nodes.clear()
-out = nodes.new('ShaderNodeOutputMaterial')
-bsdf = nodes.new('ShaderNodeBsdfPrincipled')
-tex = nodes.new('ShaderNodeTexImage')
-tex_path = os.path.join(BASE_DIR, "2k_sun.jpg")
-if os.path.exists(tex_path):
-    tex.image = bpy.data.images.load(tex_path)
-
-bsdf.inputs['Base Color'].default_value = (0, 0, 0, 1)
-em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
-links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
-links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
-sun.data.materials.append(mat)
-
-bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
-light = bpy.context.active_object
-light.name = "Sun_Light"
-light.data.energy = 50000.0
-
-print("Sun created.")
 </textarea>
           </div>
 
