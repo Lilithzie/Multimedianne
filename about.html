@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-  html, body {
-    cursor: none !important;
-  }
-  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About | Multimedia and Authoring</title>
   <meta name="description" content="About the multimedia and authoring portfolio, including purpose, visual direction, and the design goals behind each project page.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="custom-cursor.js" defer></script>
 </head>
@@ -21,7 +16,6 @@
   <div class="site-shell">
     <header class="site-header" id="site-header">
       <a class="brand" href="index.html">
-        <span class="brand-mark"></span>
         <span>Multimedia and Authoring</span>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
@@ -31,11 +25,28 @@
       </button>
       <nav class="main-nav" id="primary-nav" aria-label="Primary">
         <a href="index.html">Home</a>
-        <a href="rotoscoping.html">Rotoscoping</a>
-        <a href="solar-system.html">3D Solar System</a>
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+            Projects
+            <span class="nav-dropdown-caret" aria-hidden="true"></span>
+          </button>
+          <div class="nav-dropdown-menu" role="menu">
+            <a href="rotoscoping.html" role="menuitem"><span class="dot" aria-hidden="true"></span>Rotoscoping</a>
+            <a href="solar-system.html" role="menuitem"><span class="dot" aria-hidden="true"></span>3D Solar System</a>
+          </div>
+        </div>
         <a href="apps-used.html">Apps Used</a>
         <a class="active" href="about.html">About</a>
       </nav>
+      <div class="header-controls">
+        <button class="music-toggle" id="music-toggle" type="button" aria-label="Play background music">
+          <span class="music-icon">
+            <img src="Pictures/Pixel CD.jpg" alt="" loading="lazy">
+          </span>
+          <span class="music-mute-line" aria-hidden="true"></span>
+        </button>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
+      </div>
     </header>
 
     <main id="main-content">
@@ -44,7 +55,7 @@
           <div class="resume-aside">
             <div class="about-frame" aria-label="Photo frame">
               <div class="about-frame-inner">
-                <img class="about-photo" src="Lilith Icon.png" alt="Lilith Icon" loading="lazy">
+                <img class="about-photo" src="Pictures/Lilith Icon.png" alt="Lilith Icon" loading="lazy">
               </div>
             </div>
             <div class="resume-summary">
@@ -94,6 +105,12 @@
       <p>© 2026 Julianne S. Tumpap | BSIT - NS - 2A | Technological University of the Philippines - Taguig</p>
     </footer>
   </div>
+
+  <div class="music-bar" id="music-bar" aria-live="polite">
+    <span class="music-bar-dot"></span>
+    <span id="music-bar-label">Now playing</span>
+  </div>
+
   <script src="script.js" defer></script>
 </body>
 </html>

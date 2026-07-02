@@ -11,10 +11,30 @@ function initPlanets() {
   };
 
   const orbitRenders = document.querySelectorAll('.orbit-render[data-render]');
+  mountPlanetVideos(orbitRenders, planetVideos, 'data-render');
+}
 
-  orbitRenders.forEach((container) => {
-    const planetName = container.getAttribute('data-render');
-    const videoPath = planetVideos[planetName];
+function initMoonPlanets() {
+  const moonVideos = {
+    Mercury: 'Planet Renders with Moons/Mercury.mp4',
+    Venus: 'Planet Renders with Moons/Venus.mp4',
+    Earth: 'Planet Renders with Moons/Earth.mp4',
+    Mars: 'Planet Renders with Moons/Mars.mp4',
+    Jupiter: 'Planet Renders with Moons/Jupiter.mp4',
+    Saturn: 'Planet Renders with Moons/Saturn.mp4',
+    Uranus: 'Planet Renders with Moons/Uranus.mp4',
+    Neptune: 'Planet Renders with Moons/Neptune.mp4',
+    Pluto: 'Planet Renders with Moons/Pluto.mp4',
+  };
+
+  const moonRenders = document.querySelectorAll('.orbit-render[data-render-moons]');
+  mountPlanetVideos(moonRenders, moonVideos, 'data-render-moons');
+}
+
+function mountPlanetVideos(containers, videoMap, attrName) {
+  containers.forEach((container) => {
+    const planetName = container.getAttribute(attrName);
+    const videoPath = videoMap[planetName];
 
     if (!videoPath) return;
 
@@ -67,10 +87,12 @@ function initPlanets() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initPlanets();
+    initMoonPlanets();
     initYouTubeAutoplay();
   });
 } else {
   initPlanets();
+  initMoonPlanets();
   initYouTubeAutoplay();
 }
 

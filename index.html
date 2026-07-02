@@ -1,111 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-  html, body {
-    cursor: none !important;
-  }
-  </style>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multimedia and Authoring Projects</title>
-  <meta name="description" content="A modern multimedia and authoring portfolio featuring rotoscoping, 3D solar system work, software tools, and project process breakdowns.">
+  <title>Multimedia and Authoring — Julianne's Portfolio</title>
+  <meta name="description" content="A multimedia and authoring portfolio featuring rotoscoping, 3D solar system work, software tools, and project process breakdowns.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="custom-cursor.js" defer></script>
 </head>
 <body class="page-home">
+
   <a class="skip-link" href="#main-content">Skip to content</a>
+
   <div class="site-shell">
+
+    <!-- Header -->
     <header class="site-header" id="site-header">
       <a class="brand" href="index.html">
-        <span class="brand-mark"></span>
-        <span>Multimedia and Authoring</span>
+        <span>Multimedia &amp; Authoring</span>
       </a>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
+
+      <button class="nav-toggle" type="button"
+              aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span></span><span></span><span></span>
       </button>
+
       <nav class="main-nav" id="primary-nav" aria-label="Primary">
         <a class="active" href="index.html">Home</a>
-        <a href="rotoscoping.html">Rotoscoping</a>
-        <a href="solar-system.html">3D Solar System</a>
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+            Projects
+            <span class="nav-dropdown-caret" aria-hidden="true"></span>
+          </button>
+          <div class="nav-dropdown-menu" role="menu">
+            <a href="rotoscoping.html" role="menuitem"><span class="dot" aria-hidden="true"></span>Rotoscoping</a>
+            <a href="solar-system.html" role="menuitem"><span class="dot" aria-hidden="true"></span>3D Solar System</a>
+          </div>
+        </div>
         <a href="apps-used.html">Apps Used</a>
         <a href="about.html">About</a>
       </nav>
+
+      <div class="header-controls">
+        <button class="music-toggle" id="music-toggle" type="button" aria-label="Play background music">
+          <span class="music-icon">
+            <img src="Pictures/Pixel CD.jpg" alt="" loading="lazy">
+          </span>
+        </button>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
+      </div>
     </header>
 
+    <!-- Main -->
     <main id="main-content">
-      <section class="hero">
-        <div class="hero-copy">
-          <h1>Julianne's Multimedia Portfolio</h1>
-          <p class="lead">
-            This website is designed for my multimedia and authoring projects. Featuring creative concepts, production processes, visual experiments,
-            and final outputs in one curated space.
+
+      <!-- ── Hero Landing ────────────────────────────────── -->
+      <section class="hero-landing" aria-label="Portfolio introduction">
+
+        <div class="hero-center">
+          <div class="hero-eyebrow" aria-hidden="true">✦ BSIT — NS — 2A · TUP Taguig</div>
+
+          <h1 class="hero-title">
+            Julianne's<br>
+            <span class="accent-word">Multimedia</span><br>
+            Portfolio
+          </h1>
+
+          <p class="hero-sub">
+            Creative concepts, production processes, and final outputs
+            — from rotoscoped dance animation to a 3D journey through the solar system.
           </p>
+
+          <div class="hero-cta-row">
+            <a class="button button-primary" href="rotoscoping.html">View Rotoscoping</a>
+            <a class="button button-secondary" href="solar-system.html">3D Solar System</a>
+          </div>
         </div>
-        
-        <div class="hero-projects">
-          <a class="hero-bubble hero-bubble-rotoscoping" href="rotoscoping.html" aria-label="Open Rotoscoping">
+
+        <!-- Project bubbles -->
+        <div class="hero-bubbles">
+          <a class="hero-bubble hero-bubble-rotoscoping" href="rotoscoping.html"
+             aria-label="Go to Rotoscoping project">
             <div class="hero-bubble-circle">
-              <img src="Pictures/rotoscoping-preview.png" alt="">
+              <img src="Pictures/rotoscoping-preview.png" alt="Rotoscoping preview" loading="lazy">
             </div>
             <span class="hero-bubble-text">Rotoscoping</span>
           </a>
-          <a class="hero-bubble hero-bubble-solar" href="solar-system.html" aria-label="Open 3D Solar System">
+
+          <a class="hero-bubble hero-bubble-solar" href="solar-system.html"
+             aria-label="Go to 3D Solar System project">
             <div class="hero-bubble-circle">
-              <img src="Pictures/solar-system-preview.png" alt="">
+              <img src="Pictures/solar-system-preview.png" alt="Solar System preview" loading="lazy">
             </div>
             <span class="hero-bubble-text">3D Solar System</span>
           </a>
         </div>
+
+        <div class="hero-scroll-hint" aria-hidden="true">
+          Scroll to explore
+          <span class="scroll-arrow"></span>
+        </div>
       </section>
 
-      <section class="panel">
+      <!-- ── Project Highlights ─────────────────────────── -->
+      <section class="panel" aria-labelledby="highlights-heading">
         <div class="section-heading">
           <p class="eyebrow">Project Highlights</p>
+          <h2 id="highlights-heading">What's inside</h2>
         </div>
-        <div class="card-grid">
+
+        <div class="card-grid" style="margin-top: 1.4rem;">
           <article class="feature-card">
             <p class="card-label">Rotoscoping</p>
             <h3>Tracing movement with precision and style</h3>
             <p>
-              A look at motion studies, frame interpretation, and how live footage can be transformed into
-              expressive animated visuals.
+              A look at motion studies, frame interpretation, and how live footage can be
+              transformed into expressive animated visuals — using Yeji's dance cover of <em>River</em>.
             </p>
-            <a href="rotoscoping.html">Open page</a>
+            <a href="rotoscoping.html">Open page →</a>
           </article>
 
           <article class="feature-card">
             <p class="card-label">3D Solar System</p>
             <h3>Building space with form, light, and scale</h3>
             <p>
-              A planetary scene focused on modeling, texture choices, scene organization, and depth-driven
-              composition.
+              A planetary scene focused on modeling, texture choices, scene organization, and
+              depth-driven composition — built in Blender with a custom Python script.
             </p>
-            <a href="solar-system.html">Open page</a>
+            <a href="solar-system.html">Open page →</a>
           </article>
 
           <article class="feature-card">
             <p class="card-label">Apps Used</p>
             <h3>The software behind the creative process</h3>
             <p>
-              A quick breakdown of the exact tools used: RoughAnimator and CapCut on mobile for rotoscoping,
-              plus Blender for the 3D solar system project.
+              A quick breakdown of the exact tools used: RoughAnimator and CapCut on mobile
+              for rotoscoping, plus Blender for the 3D solar system project.
             </p>
-            <a href="apps-used.html">Open page</a>
+            <a href="apps-used.html">Open page →</a>
           </article>
         </div>
       </section>
+
+      <!-- ── Quick Stats ─────────────────────────────────── -->
+      <section class="panel" aria-labelledby="stats-heading">
+        <div class="section-heading">
+          <p class="eyebrow">By the Numbers</p>
+          <h2 id="stats-heading">A semester, condensed</h2>
+        </div>
+        <div class="card-grid" style="margin-top: 1.4rem;">
+          <article class="feature-card" style="text-align:center;">
+            <p class="card-label">Weeks of Production</p>
+            <h3 style="font-size:2.6rem; margin-bottom:0.3rem;">12</h3>
+            <p>From the first traced frame to the final rendered cut.</p>
+          </article>
+          <article class="feature-card" style="text-align:center;">
+            <p class="card-label">Celestial Bodies Modeled</p>
+            <h3 style="font-size:2.6rem; margin-bottom:0.3rem;">9</h3>
+            <p>The Sun plus all eight planets, each with real texture maps.</p>
+          </article>
+          <article class="feature-card" style="text-align:center;">
+            <p class="card-label">Apps in the Pipeline</p>
+            <h3 style="font-size:2.6rem; margin-bottom:0.3rem;">4</h3>
+            <p>RoughAnimator, After Effects, CapCut, and Blender.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ── Course Context ──────────────────────────────── -->
+      <section class="panel" aria-labelledby="course-heading">
+        <div class="split-panel">
+          <div>
+            <p class="eyebrow">About the Course</p>
+            <h2 id="course-heading" style="font-family:var(--font-display); font-size:clamp(1.8rem,3.5vw,2.6rem); margin:0 0 0.9rem;">
+              Multimedia &amp; Authoring
+            </h2>
+            <p class="lead">
+              Two outputs from the same course — a hand-traced animation and a scripted 3D scene —
+              alongside the tools and process behind each.
+            </p>
+          </div>
+          <div>
+            <ul class="detail-list">
+              <li><strong>Course:</strong> BSIT - NS - 2A</li>
+              <li><strong>School:</strong> TUP Taguig</li>
+              <li><strong>Focus:</strong> 2D tracing, 3D scene building, scripting</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Skills Gained ───────────────────────────────── -->
+      <section class="panel" aria-labelledby="skills-heading">
+        <div class="section-heading">
+          <p class="eyebrow">Skills Practiced</p>
+          <h2 id="skills-heading">What this portfolio represents</h2>
+        </div>
+        <div class="card-grid" style="margin-top: 1.4rem;">
+          <article class="feature-card">
+            <p class="card-label">Animation</p>
+            <h3>Frame-by-frame thinking</h3>
+            <p>Timing and weight, learned by tracing real motion one frame at a time.</p>
+          </article>
+          <article class="feature-card">
+            <p class="card-label">3D Production</p>
+            <h3>Scene &amp; pipeline building</h3>
+            <p>Modeling, texturing, lighting, and scripting from an empty file.</p>
+          </article>
+          <article class="feature-card">
+            <p class="card-label">Editing</p>
+            <h3>Mobile-first compositing</h3>
+            <p>Assembling and exporting finished video entirely on mobile.</p>
+          </article>
+          <article class="feature-card">
+            <p class="card-label">Scripting</p>
+            <h3>Python for creative tools</h3>
+            <p>One script that procedurally builds an entire 3D scene.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ── Closing CTA ─────────────────────────────────── -->
+      <section class="panel" aria-labelledby="cta-heading" style="text-align:center;">
+        <h2 id="cta-heading" style="font-family:var(--font-display); font-size:clamp(1.9rem,4vw,2.8rem); margin:0 0 0.9rem;">
+          Pick a project and start exploring
+        </h2>
+        <div class="hero-cta-row">
+          <a class="button button-primary" href="rotoscoping.html">Rotoscoping →</a>
+          <a class="button button-secondary" href="solar-system.html">3D Solar System →</a>
+          <a class="button button-secondary" href="about.html">Meet the Creator →</a>
+        </div>
+      </section>
+
     </main>
+
     <footer class="site-footer">
       <p>For Academic Purpose Only</p>
       <p>© 2026 Julianne S. Tumpap | BSIT - NS - 2A | Technological University of the Philippines - Taguig</p>
     </footer>
   </div>
+
+  <!-- Music now-playing bar -->
+  <div class="music-bar" id="music-bar" aria-live="polite">
+    <span class="music-bar-dot"></span>
+    <span id="music-bar-label">Now playing</span>
+  </div>
+
   <script src="script.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,726 @@
+import bpy
+import bmesh
+import math
+import os
+import random
+import mathutils
+
+# ==========================================
+# 1. SETUP & DATA
+# ==========================================
+
+# Directory - change as needed
+BASE_DIR = r"C:\xampp\htdocs\Multimedianne\Planet Textures"
+
+# [Name, Texture File, Size, Distance from Sun, Orbit Speed, Axis Spin Speed]
+PLANETS = [
+    {"name": "Sun",     "tex": "2k_sun.jpg",            "size": 5.0,  "dist": 0.0,   "orb_spd": 0.0,   "rot_spd": 0.5},
+    {"name": "Mercury", "tex": "2k_mercury.jpg",        "size": 0.3,  "dist": 8.0,   "orb_spd": 4.1,   "rot_spd": 0.1},
+    {"name": "Venus",   "tex": "2k_venus_surface.jpg",  "size": 0.7,  "dist": 11.0,  "orb_spd": 1.6,   "rot_spd": -0.1},
+    {"name": "Earth",   "tex": "2k_earth_daymap.jpg",   "size": 0.8,  "dist": 15.0,  "orb_spd": 1.0,   "rot_spd": 2.0},
+    {"name": "Mars",    "tex": "2k_mars.jpg",           "size": 0.4,  "dist": 19.0,  "orb_spd": 0.5,   "rot_spd": 1.9},
+    {"name": "Jupiter", "tex": "2k_jupiter.jpg",        "size": 2.2,  "dist": 28.0,  "orb_spd": 0.08,  "rot_spd": 4.5},
+    {"name": "Saturn",  "tex": "2k_saturn.jpg",         "size": 1.8,  "dist": 38.0,  "orb_spd": 0.03,  "rot_spd": 4.0},
+    {"name": "Uranus",  "tex": "2k_uranus.jpg",         "size": 1.2,  "dist": 48.0,  "orb_spd": 0.01,  "rot_spd": -2.5},
+    {"name": "Neptune", "tex": "2k_neptune.jpg",        "size": 1.1,  "dist": 58.0,  "orb_spd": 0.006, "rot_spd": 2.8},
+    {"name": "Pluto",   "tex": "2k_pluto.jpg",          "size": 0.15, "dist": 68.0,  "orb_spd": 0.004, "rot_spd": -0.5}
+]
+
+if hasattr(bpy.context.scene, 'eevee') and hasattr(bpy.context.scene.eevee, 'use_bloom'):
+    bpy.context.scene.eevee.use_bloom = False
+
+bpy.context.scene.render.fps = 24
+bpy.context.scene.frame_start = 1
+bpy.context.scene.frame_end = 1800
+
+# Cleanup Old System
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete(use_global=False)
+
+for mesh in list(bpy.data.meshes):
+    if mesh.users == 0: bpy.data.meshes.remove(mesh)
+for mat in list(bpy.data.materials):
+    if mat.users == 0: bpy.data.materials.remove(mat)
+for tex in list(bpy.data.textures):
+    if tex.users == 0: bpy.data.textures.remove(tex)
+
+for window in bpy.context.window_manager.windows:
+    for area in window.screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    space.overlay.show_relationship_lines = False
+
+# ==========================================
+# 2. HELPER FUNCTIONS & MATERIALS
+# ==========================================
+
+def create_material(name, tex_path, is_sun=False):
+    mat = bpy.data.materials.new(name + "_Mat")
+    mat.use_nodes = True
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    nodes.clear()
+
+    out = nodes.new('ShaderNodeOutputMaterial')
+    bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+    tex = nodes.new('ShaderNodeTexImage')
+
+    mapping = nodes.new('ShaderNodeMapping')
+    coord = nodes.new('ShaderNodeTexCoord')
+    links.new(coord.outputs['UV'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], tex.inputs['Vector'])
+
+    if os.path.exists(tex_path):
+        tex.image = bpy.data.images.load(tex_path)
+
+    if is_sun:
+        bsdf.inputs['Base Color'].default_value = (0, 0, 0, 1)
+        if 'Emission Strength' in bsdf.inputs: bsdf.inputs['Emission Strength'].default_value = 1.0
+        em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
+        links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
+        if 'Roughness' in bsdf.inputs: bsdf.inputs['Roughness'].default_value = 1.0
+        if 'Specular' in bsdf.inputs: bsdf.inputs['Specular'].default_value = 0.0
+    else:
+        links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+        if 'Roughness' in bsdf.inputs: bsdf.inputs['Roughness'].default_value = 0.9
+        if 'Specular' in bsdf.inputs: bsdf.inputs['Specular'].default_value = 0.0
+
+    links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    return mat
+
+def create_ring_material(name, tex_path):
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    nodes.clear()
+
+    out = nodes.new('ShaderNodeOutputMaterial')
+    bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+    tex = nodes.new('ShaderNodeTexImage')
+
+    if os.path.exists(tex_path): tex.image = bpy.data.images.load(tex_path)
+
+    coord = nodes.new('ShaderNodeTexCoord')
+    sep = nodes.new('ShaderNodeSeparateXYZ')
+    comb = nodes.new('ShaderNodeCombineXYZ')
+    length = nodes.new('ShaderNodeVectorMath')
+    length.operation = 'LENGTH'
+
+    links.new(coord.outputs['Object'], sep.inputs['Vector'])
+    links.new(sep.outputs['X'], comb.inputs['X'])
+    links.new(sep.outputs['Y'], comb.inputs['Y'])
+    links.new(comb.outputs['Vector'], length.inputs[0])
+
+    map_range = nodes.new('ShaderNodeMapRange')
+    map_range.inputs[1].default_value = 2.0
+    map_range.inputs[2].default_value = 4.25
+
+    uv_comb = nodes.new('ShaderNodeCombineXYZ')
+    uv_comb.inputs['Y'].default_value = 0.5
+
+    links.new(length.outputs['Value'], map_range.inputs['Value'])
+    links.new(map_range.outputs['Result'], uv_comb.inputs['X'])
+    links.new(uv_comb.outputs['Vector'], tex.inputs['Vector'])
+
+    links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+    links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
+
+    if 'Specular' in bsdf.inputs: bsdf.inputs['Specular'].default_value = 0.0
+    em_socket = 'Emission Color' if 'Emission Color' in bsdf.inputs else 'Emission'
+    links.new(tex.outputs['Color'], bsdf.inputs[em_socket])
+    if 'Emission Strength' in bsdf.inputs: bsdf.inputs['Emission Strength'].default_value = 0.15
+
+    links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    return mat
+
+def make_rocket_material(name, color, metallic, roughness, emission=0):
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    mat.diffuse_color = (color[0], color[1], color[2], 1)
+
+    bsdf = None
+    for node in mat.node_tree.nodes:
+        if node.type == 'BSDF_PRINCIPLED':
+            bsdf = node
+            break
+
+    if bsdf:
+        bsdf.inputs["Base Color"].default_value = (color[0], color[1], color[2], 1)
+        bsdf.inputs["Metallic"].default_value = metallic
+        bsdf.inputs["Roughness"].default_value = roughness
+
+        if emission > 0:
+            if "Emission Color" in bsdf.inputs:
+                bsdf.inputs["Emission Color"].default_value = (color[0], color[1], color[2], 1)
+            elif "Emission" in bsdf.inputs:
+                bsdf.inputs["Emission"].default_value = (color[0], color[1], color[2], 1)
+            bsdf.inputs["Emission Strength"].default_value = emission
+
+    return mat
+
+whitePaint = make_rocket_material("WhitePaint", (0.93, 0.93, 0.94), 0.15, 0.32)
+blackPaint = make_rocket_material("BlackPaint", (0.05, 0.05, 0.06), 0.25, 0.42)
+metal = make_rocket_material("Metal", (0.62, 0.63, 0.66), 1.0, 0.15)
+darkMetal = make_rocket_material("DarkMetal", (0.18, 0.18, 0.20), 1.0, 0.25)
+glass = make_rocket_material("Glass", (0.18, 0.32, 0.45), 0.0, 0.02)
+engineGlow = make_rocket_material("EngineGlow", (0.45, 0.75, 1.0), 0, 0, 20)
+
+def animate_infinite_spin(obj, speed_multiplier, start_frame=0):
+    if speed_multiplier == 0: return
+    obj.rotation_mode = 'XYZ'
+    driver_speed = (math.pi * speed_multiplier) / 60.0
+    driver = obj.driver_add("rotation_euler", 2)
+    driver.driver.expression = f"(frame - {start_frame}) * {driver_speed} if frame > {start_frame} else 0.0"
+
+# ==========================================
+# 3. BUILD THE SOLAR SYSTEM
+# ==========================================
+for p in PLANETS:
+    is_sun = (p["name"] == "Sun")
+    tex_full_path = os.path.join(BASE_DIR, p["tex"])
+
+    if not is_sun:
+        bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+        pivot = bpy.context.active_object
+        pivot.name = p["name"] + "_Pivot"
+        pivot.hide_viewport = True
+        animate_infinite_spin(pivot, p["orb_spd"], 0)
+
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        segments=128 if is_sun else 64,
+        ring_count=64 if is_sun else 32,
+        radius=p["size"],
+        location=(p["dist"], 0, 0)
+    )
+    body = bpy.context.active_object
+    body.name = p["name"]
+    bpy.ops.object.shade_smooth()
+
+    if is_sun: body.visible_shadow = False
+
+    mat = create_material(p["name"], tex_full_path, is_sun)
+    body.data.materials.append(mat)
+    animate_infinite_spin(body, p["rot_spd"], 0)
+
+    if not is_sun: body.parent = pivot
+
+    if p["name"] == "Saturn":
+        bpy.ops.mesh.primitive_plane_add(size=8.5, location=(p["dist"], 0, 0))
+        ring = bpy.context.active_object
+        ring.name = "Saturn_Ring"
+        ring.parent = pivot
+        ring.rotation_euler[1] = math.radians(20)
+
+        ring_tex_path = os.path.join(BASE_DIR, "2k_saturn_ring_alpha.png")
+        if not os.path.exists(ring_tex_path):
+            ring_tex_path = os.path.join(BASE_DIR, "2k_saturn_ring_alpha.jpg")
+
+        ring_mat = create_ring_material("Saturn_Ring_Mat", ring_tex_path)
+        ring.data.materials.append(ring_mat)
+
+# ==========================================
+# 4. TRUE JAGGED ASTEROID BELT
+# ==========================================
+bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+ast_pivot = bpy.context.active_object
+ast_pivot.name = "Asteroid_Belt_Pivot"
+animate_infinite_spin(ast_pivot, 0.15, 0)
+
+ast_mat = bpy.data.materials.new("Asteroid_Mat")
+ast_mat.use_nodes = True
+ast_nodes = ast_mat.node_tree.nodes
+ast_links = ast_mat.node_tree.links
+
+ast_bsdf = ast_nodes.get('Principled BSDF')
+if ast_bsdf:
+    ast_bsdf.inputs['Roughness'].default_value = 1.0
+    if 'Specular' in ast_bsdf.inputs: ast_bsdf.inputs['Specular'].default_value = 0.0
+
+color_noise = ast_nodes.new('ShaderNodeTexNoise')
+color_noise.inputs['Scale'].default_value = 15.0
+color_ramp = ast_nodes.new('ShaderNodeValToRGB')
+color_ramp.color_ramp.elements[0].position = 0.4
+color_ramp.color_ramp.elements[0].color = (0.05, 0.05, 0.05, 1.0)
+color_ramp.color_ramp.elements[1].position = 0.8
+color_ramp.color_ramp.elements[1].color = (0.35, 0.32, 0.30, 1.0)
+ast_links.new(color_noise.outputs['Fac'], color_ramp.inputs['Fac'])
+ast_links.new(color_ramp.outputs['Color'], ast_bsdf.inputs['Base Color'])
+
+bump_tex = ast_nodes.new('ShaderNodeTexVoronoi')
+bump_tex.inputs['Scale'].default_value = 25.0
+bump_node = ast_nodes.new('ShaderNodeBump')
+bump_node.inputs['Distance'].default_value = 0.2
+bump_node.inputs['Strength'].default_value = 0.8
+ast_links.new(bump_tex.outputs['Distance'], bump_node.inputs['Height'])
+ast_links.new(bump_node.outputs['Normal'], ast_bsdf.inputs['Normal'])
+
+prototypes = []
+for i in range(15):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1.0, location=(0, 0, 0))
+    proto = bpy.context.active_object
+    proto.name = f"Asteroid_Proto_{i}"
+    proto.data.materials.append(ast_mat)
+    
+    bm = bmesh.new()
+    bm.from_mesh(proto.data)
+    for v in bm.verts:
+        offset = random.uniform(-0.5, 0.5) 
+        v.co += v.normal * offset
+    bm.to_mesh(proto.data)
+    bm.free()
+    
+    bpy.ops.object.shade_flat()
+    proto.hide_viewport = True
+    proto.hide_render = True
+    prototypes.append(proto)
+
+for i in range(750): 
+    src_proto = random.choice(prototypes)
+    new_obj = bpy.data.objects.new(f"Asteroid_{i}", src_proto.data)
+    bpy.context.scene.collection.objects.link(new_obj)
+    
+    dist = random.uniform(21.5, 26.5)
+    angle = random.uniform(0, 2 * math.pi)
+    x = dist * math.cos(angle)
+    y = dist * math.sin(angle)
+    z = random.gauss(0, 0.4) 
+    
+    new_obj.location = (x, y, z)
+    
+    base_size = 0.02 + (random.random() ** 3) * 0.4 
+    scale_variance = random.uniform(0.6, 1.4)
+    new_obj.scale = (
+        base_size * scale_variance, 
+        base_size * random.uniform(0.6, 1.4), 
+        base_size * random.uniform(0.6, 1.4)
+    )
+    
+    new_obj.rotation_euler = (random.uniform(0, 6.28), random.uniform(0, 6.28), random.uniform(0, 6.28))
+    new_obj.parent = ast_pivot
+
+# ==========================================
+# 5. LIGHTING & BACKGROUND
+# ==========================================
+bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
+sun_light = bpy.context.active_object
+sun_light.name = "Sun_Light"
+sun_light.data.energy = 50000.0
+sun_light.data.shadow_soft_size = 5.0
+
+world = bpy.context.scene.world
+if not world:
+    world = bpy.data.worlds.new("World")
+    bpy.context.scene.world = world
+
+world.use_nodes = True
+bg_nodes = world.node_tree.nodes
+bg_links = world.node_tree.links
+bg_nodes.clear()
+
+node_env = bg_nodes.new('ShaderNodeTexEnvironment')
+bg_tex_path = os.path.join(BASE_DIR, "2k_stars_milky_way.jpg")
+if os.path.exists(bg_tex_path):
+    node_env.image = bpy.data.images.load(bg_tex_path)
+
+node_bg_stars = bg_nodes.new('ShaderNodeBackground')
+node_bg_dark = bg_nodes.new('ShaderNodeBackground')
+node_bg_dark.inputs['Color'].default_value = (0.015, 0.015, 0.02, 1)
+
+node_mix = bg_nodes.new('ShaderNodeMixShader')
+node_light_path = bg_nodes.new('ShaderNodeLightPath')
+node_out = bg_nodes.new('ShaderNodeOutputWorld')
+
+bg_links.new(node_env.outputs['Color'], node_bg_stars.inputs['Color'])
+bg_links.new(node_bg_dark.outputs['Background'], node_mix.inputs[1])
+bg_links.new(node_bg_stars.outputs['Background'], node_mix.inputs[2])
+bg_links.new(node_light_path.outputs['Is Camera Ray'], node_mix.inputs['Fac'])
+bg_links.new(node_mix.outputs['Shader'], node_out.inputs['Surface'])
+
+# ============================================================
+# 6. BUILD THE REALISTIC SPACE ROCKET
+# ============================================================
+
+bpy.ops.mesh.primitive_cylinder_add(vertices=96, radius=1, depth=18, location=(0,0,0))
+rocket = bpy.context.object
+rocket.name = "Preview_Rocket"
+rocket.data.materials.append(whitePaint)
+
+sub = rocket.modifiers.new("Subdivision", 'SUBSURF')
+sub.levels = 2
+sub.render_levels = 3
+bpy.context.view_layer.objects.active = rocket
+bpy.ops.object.shade_smooth()
+
+bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=1, radius2=0, depth=3, location=(0,0,10.5))
+nose = bpy.context.object
+nose.data.materials.append(whitePaint)
+nose.parent = rocket
+bpy.ops.object.shade_smooth()
+
+bpy.ops.mesh.primitive_cylinder_add(vertices=96, radius=0.96, depth=0.8, location=(0,0,8.9))
+transition = bpy.context.object
+transition.data.materials.append(darkMetal)
+transition.parent = rocket
+
+bpy.ops.mesh.primitive_cylinder_add(vertices=96, radius=1.12, depth=1.3, location=(0,0,-9.35))
+skirt = bpy.context.object
+skirt.data.materials.append(darkMetal)
+skirt.parent = rocket
+
+bpy.ops.mesh.primitive_cylinder_add(vertices=96, radius=1.005, depth=1.0, location=(0,0,3.8))
+band = bpy.context.object
+band.data.materials.append(blackPaint)
+band.parent = rocket
+
+window_locations = [(0.98,0,8.0), (0.98,0,7.4), (0.98,0,6.8)]
+for loc in window_locations:
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.16, location=loc, segments=48, ring_count=24)
+    win = bpy.context.object
+    win.data.materials.append(glass)
+    win.parent = rocket
+
+ring_heights = [-7, -4, -1, 2, 5]
+for z in ring_heights:
+    bpy.ops.mesh.primitive_torus_add(major_radius=1.01, minor_radius=0.015, major_segments=96, minor_segments=24, location=(0,0,z))
+    ring = bpy.context.object
+    ring.data.materials.append(darkMetal)
+    ring.parent = rocket
+
+for angle in [0, 90, 180, 270]:
+    r = math.radians(angle)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.025, depth=0.55, location=(math.cos(r)*1.01, math.sin(r)*1.01, 4.8))
+    ant = bpy.context.object
+    ant.rotation_euler[1] = math.radians(90)
+    ant.data.materials.append(metal)
+    ant.parent = rocket
+
+for side in (-1, 1):
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.12, depth=8, location=(side*1.28, 0, -2))
+    mount = bpy.context.object
+    mount.rotation_euler[1] = math.radians(90)
+    mount.data.materials.append(darkMetal)
+    mount.parent = rocket
+
+engine_positions = [(0.00, 0.00), (0.52, 0.30), (-0.52, 0.30), (0.52, -0.30), (-0.52, -0.30)]
+flames = []
+
+for x, y in engine_positions:
+    bpy.ops.mesh.primitive_cone_add(vertices=64, radius1=0.34, radius2=0.17, depth=1.15, location=(x, y, -10.45))
+    bell = bpy.context.object
+    bell.rotation_euler[0] = math.radians(180)
+    bell.data.materials.append(metal)
+    bell.parent = rocket
+    bpy.ops.object.shade_smooth()
+
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, location=(x, y, -11.0), segments=32, ring_count=16)
+    glow = bpy.context.object
+    glow.data.materials.append(engineGlow)
+    glow.parent = rocket
+
+    bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=0.12, radius2=0.40, depth=3.5, location=(x, y, -12.8))
+    flame = bpy.context.object
+    flame.rotation_euler[0] = math.radians(180)
+    flame.data.materials.append(engineGlow)
+    flame.parent = rocket
+    flames.append(flame)
+
+booster_locations = [(1.75, 0, 0), (-1.75, 0, 0)]
+for loc in booster_locations:
+    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.42, depth=16, location=loc)
+    booster = bpy.context.object
+    booster.data.materials.append(whitePaint)
+    booster.parent = rocket
+    bpy.ops.object.shade_smooth()
+
+    bpy.ops.mesh.primitive_cone_add(vertices=64, radius1=0.42, radius2=0, depth=1.5, location=(loc[0], loc[1], 8.75))
+    cone = bpy.context.object
+    cone.data.materials.append(whitePaint)
+    cone.parent = rocket
+
+    bpy.ops.mesh.primitive_cone_add(vertices=48, radius1=0.18, radius2=0.09, depth=0.75, location=(loc[0], loc[1], -8.45))
+    bell = bpy.context.object
+    bell.rotation_euler[0] = math.radians(180)
+    bell.data.materials.append(metal)
+    bell.parent = rocket
+
+fin_positions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+for x, y in fin_positions:
+    bpy.ops.mesh.primitive_cube_add(location=(x*0.96, y*0.96, -7.5))
+    fin = bpy.context.object
+    fin.scale = (0.05, 0.70, 1.10)
+    if x != 0:
+        fin.rotation_euler[2] = math.radians(90)
+    fin.data.materials.append(darkMetal)
+    fin.parent = rocket
+
+for angle in range(0, 360, 45):
+    r = math.radians(angle)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.035, depth=0.18, location=(math.cos(r)*1.03, math.sin(r)*1.03, 6.8))
+    thruster = bpy.context.object
+    thruster.rotation_euler[1] = math.radians(90)
+    thruster.data.materials.append(darkMetal)
+    thruster.parent = rocket
+
+panel_z = [-6, -3, 0, 3, 6, 9]
+for z in panel_z:
+    bpy.ops.mesh.primitive_torus_add(major_radius=1.01, minor_radius=0.008, major_segments=96, minor_segments=16, location=(0, 0, z))
+    panel = bpy.context.object
+    panel.data.materials.append(darkMetal)
+    panel.parent = rocket
+
+for i in range(12):
+    angle = (i / 12) * math.pi * 2
+    bpy.ops.mesh.primitive_cube_add(location=(math.cos(angle) * 1.02, math.sin(angle) * 1.02, 0))
+    strip = bpy.context.object
+    strip.scale = (0.02, 0.12, 9.0)
+    strip.data.materials.append(darkMetal)
+    strip.parent = rocket
+
+pipe_height = [-8, -5, -2, 1, 4, 7]
+for z in pipe_height:
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.015, depth=2.5, location=(0.65, 0, z))
+    pipe = bpy.context.object
+    pipe.rotation_euler[1] = math.radians(90)
+    pipe.data.materials.append(metal)
+    pipe.parent = rocket
+
+bpy.ops.mesh.primitive_cube_add(location=(0.85, 0, 2))
+hatch = bpy.context.object
+hatch.scale = (0.08, 0.02, 0.15)
+hatch.data.materials.append(darkMetal)
+hatch.parent = rocket
+
+for i in range(6):
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.12, 
+        location=(random.uniform(-0.6, 0.6), random.uniform(-0.6, 0.6), random.uniform(-10, 10))
+    )
+    scorch = bpy.context.object
+    scorch.scale = (1, 0.3, 1)
+    scorch.data.materials.append(blackPaint)
+    scorch.parent = rocket
+
+for z in [-3, 3]:
+    bpy.ops.mesh.primitive_torus_add(major_radius=1.75, minor_radius=0.01, major_segments=64, minor_segments=16, location=(1.75, 0, z))
+    sep1 = bpy.context.object
+    sep1.data.materials.append(blackPaint)
+    sep1.parent = rocket
+
+    bpy.ops.mesh.primitive_torus_add(major_radius=1.75, minor_radius=0.01, major_segments=64, minor_segments=16, location=(-1.75, 0, z))
+    sep2 = bpy.context.object
+    sep2.data.materials.append(blackPaint)
+    sep2.parent = rocket
+
+for i in range(20):
+    angle = (i / 20) * math.pi * 2
+    for side in (-1, 1):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.02, 
+            location=(side * 1.25, math.cos(angle) * 0.25, math.sin(angle) * 6)
+        )
+        rivet = bpy.context.object
+        rivet.data.materials.append(metal)
+        rivet.parent = rocket
+
+bpy.context.view_layer.objects.active = rocket
+bev = rocket.modifiers.new(name="Bevel", type='BEVEL')
+bev.width = 0.02
+bev.segments = 2
+bev.limit_method = 'ANGLE'
+
+
+# ==========================================
+# 7. CAMERA SETUP & ACT-BY-ACT ANIMATION
+# ==========================================
+cam = bpy.data.objects.get("Camera")
+if not cam:
+    bpy.ops.object.camera_add()
+    cam = bpy.context.active_object
+    cam.name = "Camera"
+
+cam.parent = None
+cam.data.lens = 45
+cam.data.clip_end = 10000.0
+bpy.context.scene.camera = cam
+
+# ------------------------------------------------------------
+# CINEMATIC HEADLAMP (Guarantees rocket is never pitch black)
+# ------------------------------------------------------------
+bpy.ops.object.light_add(type='AREA', location=(0, 0, 0))
+headlamp = bpy.context.active_object
+headlamp.name = "Camera_Headlamp"
+headlamp.parent = cam
+headlamp.data.size = 20.0
+headlamp.data.spread = 3.14
+
+target_focus = bpy.data.objects.get("Camera_Focus_Target")
+if not target_focus:
+    bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+    target_focus = bpy.context.active_object
+    target_focus.name = "Camera_Focus_Target"
+target_focus.hide_viewport = True
+
+cam.constraints.clear()
+track = cam.constraints.new(type='TRACK_TO')
+track.target = target_focus
+track.track_axis = 'TRACK_NEGATIVE_Z'
+track.up_axis = 'UP_Y'
+
+def mix_vectors(v1, v2, t):
+    return (
+        v1[0] + (v2[0] - v1[0]) * t,
+        v1[1] + (v2[1] - v1[1]) * t,
+        v1[2] + (v2[2] - v1[2]) * t
+    )
+
+if cam.animation_data: cam.animation_data_clear()
+if target_focus.animation_data: target_focus.animation_data_clear()
+if rocket.animation_data: rocket.animation_data_clear()
+if headlamp.data.animation_data: headlamp.data.animation_data_clear()
+
+# Remote Launch Coordinates (Far away from the solar system)
+LAUNCH_X = 200.0
+LAUNCH_Y = -200.0
+
+for frame in range(1, 1801):
+    
+    # --- FLAME FLICKER ENGINE (Only runs while rocket is visible) ---
+    if frame <= 300:
+        flicker = 1.0 + random.uniform(-0.1, 0.15)
+        for flame in flames:
+            flame.scale = (1, 1, flicker)
+            flame.keyframe_insert("scale", frame=frame)
+
+    # --- ACT 1: LAUNCH PHASE (Frames 1-150) ---
+    if frame <= 150:
+        t = (frame - 1) / 149.0
+        
+        # Rocket starts at Z = -150 and flies up to Z = -50
+        rock_z = -150.0 + (100.0 * t) 
+        rocket.location = (LAUNCH_X, LAUNCH_Y, rock_z)
+        rocket.scale = (1.0, 1.0, 1.0)
+        
+        # Point straight up
+        direction = mathutils.Vector((0, 0, 1))
+        rocket.rotation_mode = 'QUATERNION'
+        rocket.rotation_quaternion = direction.to_track_quat('Z', 'Y')
+
+        # WIDE SHOT: Pull camera back to 60 units distance to frame the 28-unit tall rocket
+        cam_dist = 60.0 
+        cam_x = LAUNCH_X + (cam_dist * math.cos(t * 1.5))
+        cam_y = LAUNCH_Y + (cam_dist * math.sin(t * 1.5))
+        
+        cam.location = (cam_x, cam_y, rock_z + 15.0) 
+        target_focus.location = (LAUNCH_X, LAUNCH_Y, rock_z) 
+        
+        # Headlamp is ON to illuminate the rocket in deep space
+        headlamp.data.energy = 85000.0
+
+    # --- ACT 2: TRANSITION & EARTH LANDING (Frames 151-300) ---
+    elif frame <= 300:
+        t = (frame - 150) / 150.0
+        smooth_t = t * t * (3.0 - 2.0 * t) 
+        
+        # Calculate exactly where Earth will be when the rocket touches down
+        earth_angle = 300 * ((math.pi * PLANETS[3]["orb_spd"]) / 60.0)
+        earth_x = PLANETS[3]["dist"] * math.cos(earth_angle)
+        earth_y = PLANETS[3]["dist"] * math.sin(earth_angle)
+        
+        # Rocket glides from deep space up to Earth's dynamic location
+        start_loc = (LAUNCH_X, LAUNCH_Y, -50.0)
+        end_loc = (earth_x, earth_y, 0.0)
+        rocket.location = mix_vectors(start_loc, end_loc, smooth_t)
+        
+        # Shrink down to 0.15 size
+        s = 1.0 - (0.85 * smooth_t) 
+        rocket.scale = (s, s, s)
+        
+        # Point towards Earth
+        direction = mathutils.Vector((end_loc[0] - start_loc[0], end_loc[1] - start_loc[1], 10.0))
+        rocket.rotation_quaternion = direction.to_track_quat('Z', 'Y')
+
+        # Camera transitions from wide shot to massive solar system shot
+        start_cam = (LAUNCH_X + (60.0 * math.cos(1.0 * 1.5)), LAUNCH_Y + (60.0 * math.sin(1.0 * 1.5)), -50.0 + 15.0)
+        end_cam = (260.0, -360.0, 190.0)
+        cam.location = mix_vectors(start_cam, end_cam, smooth_t)
+        
+        start_targ = (LAUNCH_X, LAUNCH_Y, -50.0)
+        end_targ = (0, 0, 0)
+        target_focus.location = mix_vectors(start_targ, end_targ, smooth_t)
+
+        # Headlamp stays ON as the rocket approaches
+        headlamp.data.energy = 85000.0
+
+    # --- ACT 3: SOLAR SYSTEM TOUR (Frames 301-1800) ---
+    else:
+        # THE KILL SWITCH: Turn off the headlamp and scale the rocket to 0 so it disappears
+        headlamp.data.energy = 0.0
+        rocket.scale = (0.0, 0.0, 0.0)
+        rocket.location = (0, 0, -9999) # Safe hide below the scene
+
+        # Camera continues its pure un-lit tour of the 10 planets
+        relative_frame = frame - 301
+        planet_idx = relative_frame // 150
+        local_f = relative_frame % 150
+        
+        p = PLANETS[planet_idx]
+        angle = frame * ((math.pi * p["orb_spd"]) / 60.0)
+        pos_x = p["dist"] * math.cos(angle)
+        pos_y = p["dist"] * math.sin(angle)
+        targ = (pos_x, pos_y, 0.0)
+        
+        if p["name"] == "Sun":
+            cam_ideal = (0.0, -22.0, 6.5)
+        else:
+            cam_dist = p["size"] * 4.6
+            if p["name"] == "Saturn": cam_dist = p["size"] * 6.5  
+            elif p["name"] == "Jupiter": cam_dist = p["size"] * 5.2
+            
+            view_angle = angle + math.radians(135)
+            cam_ideal = (pos_x + cam_dist * math.cos(view_angle), pos_y + cam_dist * math.sin(view_angle), cam_dist * 0.42)
+            
+        if local_f < 40:
+            if planet_idx == 0:
+                prev_cam = (260.0, -360.0, 190.0)
+                prev_targ = (0.0, 0.0, 0.0)
+            else:
+                prev_p = PLANETS[planet_idx - 1]
+                prev_angle = frame * ((math.pi * prev_p["orb_spd"]) / 60.0)
+                prev_px = prev_p["dist"] * math.cos(prev_angle)
+                prev_py = prev_p["dist"] * math.sin(prev_angle)
+                prev_targ = (prev_px, prev_py, 0.0)
+                
+                if prev_p["name"] == "Sun":
+                    prev_cam = (0.0, -22.0, 6.5)
+                else:
+                    prev_cdist = prev_p["size"] * 4.6
+                    if prev_p["name"] == "Saturn": prev_cdist = prev_p["size"] * 6.5
+                    elif prev_p["name"] == "Jupiter": prev_cdist = prev_p["size"] * 5.2
+                    
+                    p_view_angle = prev_angle + math.radians(135)
+                    prev_cam = (prev_px + prev_cdist * math.cos(p_view_angle), prev_py + prev_cdist * math.sin(p_view_angle), prev_cdist * 0.42)
+            
+            t = local_f / 40.0
+            smooth_t = t * t * (3.0 - 2.0 * t) 
+            cam.location = mix_vectors(prev_cam, cam_ideal, smooth_t)
+            target_focus.location = mix_vectors(prev_targ, targ, smooth_t)
+        else:
+            cam.location = cam_ideal
+            target_focus.location = targ
+
+    # Insert Final Baked Keys for this exact frame
+    rocket.keyframe_insert(data_path="location", frame=frame)
+    rocket.keyframe_insert(data_path="scale", frame=frame)
+    if frame <= 300:
+        rocket.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+    
+    cam.keyframe_insert(data_path="location", frame=frame)
+    target_focus.keyframe_insert(data_path="location", frame=frame)
+    headlamp.data.keyframe_insert(data_path="energy", frame=frame)
+
+# --- FORCE VIEWPORT REFRESH ---
+for area in bpy.context.screen.areas:
+    if area.type == 'VIEW_3D':
+        for space in area.spaces:
+            if space.type == 'VIEW_3D':
+                space.shading.type = 'MATERIAL'

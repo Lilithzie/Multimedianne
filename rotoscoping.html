@@ -1,73 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-  html, body {
-    cursor: none !important;
-  }
-  </style>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rotoscoping | Multimedia and Authoring</title>
   <meta name="description" content="A rotoscoping project inspired by Yeji's dance cover of River, documenting visual direction, creative process, and weekly progress outputs.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="custom-cursor.js" defer></script>
 </head>
 <body class="page-rotoscoping">
+
   <a class="skip-link" href="#main-content">Skip to content</a>
+
   <div class="site-shell">
+
     <header class="site-header" id="site-header">
       <a class="brand" href="index.html">
-        <span class="brand-mark"></span>
-        <span>Multimedia and Authoring</span>
+        <span>Multimedia &amp; Authoring</span>
       </a>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
+      <button class="nav-toggle" type="button"
+              aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span></span><span></span><span></span>
       </button>
       <nav class="main-nav" id="primary-nav" aria-label="Primary">
         <a href="index.html">Home</a>
-        <a class="active" href="rotoscoping.html">Rotoscoping</a>
-        <a href="solar-system.html">3D Solar System</a>
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="true" aria-expanded="false">
+            Projects
+            <span class="nav-dropdown-caret" aria-hidden="true"></span>
+          </button>
+          <div class="nav-dropdown-menu" role="menu">
+            <a class="active" href="rotoscoping.html" role="menuitem"><span class="dot" aria-hidden="true"></span>Rotoscoping</a>
+            <a href="solar-system.html" role="menuitem"><span class="dot" aria-hidden="true"></span>3D Solar System</a>
+          </div>
+        </div>
         <a href="apps-used.html">Apps Used</a>
         <a href="about.html">About</a>
       </nav>
+      <div class="header-controls">
+        <button class="music-toggle" id="music-toggle" type="button" aria-label="Play background music">
+          <span class="music-icon">
+            <img src="Pictures/Pixel CD.jpg" alt="" loading="lazy">
+          </span>
+        </button>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
+      </div>
     </header>
 
     <main id="main-content">
-      <section class="page-intro">
-        <h1>Rotoscoping</h1>
-        <p class="lead">
-          This rotoscoping project is based on Yeji's dance cover of <em>River</em>,
-          using traced motion and stylized frames to highlight the choreography's precision, control,
-          and expressive flow.
-        </p>
+
+      <!-- ── Page Hero ──────────────────────────────────── -->
+      <section class="hero-landing" style="min-height: 52vh; padding-block: clamp(2rem,5vw,4rem);"
+               aria-label="Rotoscoping page introduction">
+        <div class="hero-center">
+          <div class="hero-eyebrow">✦ Multimedia Project — Frame by Frame</div>
+          <h1 class="hero-title" style="font-size: clamp(2.6rem,7vw,6rem);">
+            Roto&shy;<span class="accent-word">scoping</span>
+          </h1>
+          <p class="hero-sub">
+            Traced motion and stylized frames based on Yeji's dance cover of <em>River</em> —
+            highlighting choreography's precision, control, and expressive flow.
+          </p>
+          <div class="hero-cta-row">
+            <a class="button button-primary" href="#process">See the process</a>
+            <a class="button button-secondary" href="#final-output">Final output</a>
+          </div>
+        </div>
       </section>
 
-   
+       <!-- ── Final Output ───────────────────────────────── -->
+      <section class="panel" id="final-output" aria-labelledby="final-heading">
+        <div class="section-heading">
+          <p class="eyebrow">Final Output</p>
+          <h2 id="final-heading">Final Rotoscoped Video</h2>
+        </div>
+        <div class="video-showcase" style="margin-top: 1.2rem;">
+          <div class="video-frame">
+            <iframe
+              src="https://www.youtube.com/embed/LV7TFzsTLbs"
+              title="Final Rotoscoping Video"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
 
-      <section class="content-grid roto-media" aria-label="Reference and weekly progress">
+
+      <!-- ── Reference + Weekly Progress ───────────────── -->
+      <section class="content-grid roto-media" id="roto-media"
+               aria-label="Reference video and weekly progress">
+
         <article class="panel">
           <div class="media-intro">
             <div class="section-heading">
               <p class="eyebrow">Reference Video</p>
-              <h2>Dance Performance Video Used</h2>
+              <h2>Dance Performance Used</h2>
             </div>
             <p class="disclaimer">
               <strong>Disclaimer:</strong> The embedded reference video is owned by its respective rights holders.
-              This page is for educational/portfolio demonstration only and does not claim ownership of the original
-              content.
+              This page is for educational/portfolio demonstration only and does not claim ownership of the
+              original content.
             </p>
           </div>
           <div class="video-showcase">
             <div class="video-frame">
               <iframe
                 src="https://www.youtube.com/embed/tnMFp53wrRg"
-                title="Yeji - River Dance Cover (Reference)"
+                title="Yeji — River Dance Cover (Reference)"
                 loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen></iframe>
@@ -81,179 +125,205 @@
               <p class="eyebrow">Weekly Progress</p>
               <h2>Weeks of Development</h2>
             </div>
-            <p class="lead" style="text-align: justify; font-size: 18px;">
-              Each video consists of a few seconds of rotoscoped footage, showing the development of the project over time. You can navigate through the weeks using the arrows on either side of the carousel.
+            <p class="lead" style="font-size: 1rem; text-align: justify;">
+              Each clip shows a few rotoscoped seconds, tracking how the project evolved week by week.
+              Use the arrows to navigate through the carousel.
             </p>
           </div>
-          <div class="weekly-shell" aria-label="Weekly progress carousel">
-            <div class="weekly-controls" aria-label="Weekly carousel controls">
-              <button class="button button-secondary weekly-nav" type="button" data-weekly-nav="prev" aria-label="Previous week">&lt;</button>
-              <button class="button button-secondary weekly-nav" type="button" data-weekly-nav="next" aria-label="Next week">&gt;</button>
-            </div>
 
+          <div class="weekly-shell" aria-label="Weekly progress carousel">
+            <div class="weekly-controls" aria-label="Carousel controls">
+              <button class="button button-secondary weekly-nav" type="button"
+                      data-weekly-nav="prev" aria-label="Previous week">&#8249;</button>
+              <button class="button button-secondary weekly-nav" type="button"
+                      data-weekly-nav="next" aria-label="Next week">&#8250;</button>
+            </div>
             <div class="weekly-viewport" id="weekly-carousel">
               <div class="weekly-track">
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 1</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/R9IJJ_bTctQ"
-
-                      title="Week 1 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/NbdC8mcMGjI"
+                      title="Week 1 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 2</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_2"
-                      title="Week 2 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/3PPAZvgeO1U"
+                      title="Week 2 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 3</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_3"
-                      title="Week 3 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/1V7__2cJxSo"
+                      title="Week 3 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 4</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_4"
-                      title="Week 4 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/TdVYMCjbFDs"
+                      title="Week 4 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 5</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_5"
-                      title="Week 5 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/ocXPxEsuMGM"
+                      title="Week 5 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 6</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_6"
-                      title="Week 6 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/ucjT4dFQmPQ"
+                      title="Week 6 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 7</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_7"
-                      title="Week 7 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/yInYsEGulto"
+                      title="Week 7 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 8</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_8"
-                      title="Week 8 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/5w8mVE187DQ"
+                      title="Week 8 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 9</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_9"
-                      title="Week 9 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/jq7XPa2aA8Q"
+                      title="Week 9 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 10</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_10"
-                      title="Week 10 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/Zpp2oUQC_FY"
+                      title="Week 10 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 11</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_11"
-                      title="Week 11 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/KyBOh2otRZg"
+                      title="Week 11 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
+
                 <article class="video-card weekly-card">
                   <p class="card-label">Week 12</p>
                   <div class="video-frame">
-                    <iframe
-                      src="https://www.youtube.com/embed/VIDEO_ID_WEEK_12"
-                      title="Week 12 Progress Video"
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    <iframe src="https://www.youtube.com/embed/ziJ55_7oGG8"
+                      title="Week 12 Progress" loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowfullscreen></iframe>
                   </div>
                 </article>
-              </div>
-            </div>
+
+              </div><!-- /weekly-track -->
+            </div><!-- /weekly-viewport -->
           </div>
         </article>
+
       </section>
 
-      <section class="panel">
+      <!-- ── Process Steps ───────────────────────────────── -->
+      <section class="panel" id="process" aria-labelledby="process-heading">
         <div class="section-heading">
-          <p class="eyebrow">Final Output</p>
-          <h2>Final Rotoscoped Video</h2>
+          <p class="eyebrow">Process</p>
+          <h2 id="process-heading">Three apps, three stages</h2>
         </div>
-        <div class="video-showcase">
-          <div class="video-frame">
-            <iframe
-              src="https://www.youtube.com/embed/NC9yhDvskiQ?"
-              title="Final Rotoscoping Video"
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen></iframe>
-          </div>
+
+        <div class="card-grid" style="margin-top: 1.2rem;">
+
+          <article class="feature-card">
+            <div class="step-figure">
+              <img src="Pictures/Steps/roto-step-1.jpg" alt="Tracing frames in RoughAnimator"
+                   data-lightbox loading="lazy">
+            </div>
+            <p class="card-label">Step 1</p>
+            <h3 style="font-size:1.25rem;">Trace in RoughAnimator</h3>
+            <p>Each pose is hand-traced on mobile using onion-skinning for consistency.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="step-figure">
+              <img src="Pictures/Steps/roto-step-2.jpg" alt="Compositing in Adobe After Effects"
+                   data-lightbox loading="lazy">
+            </div>
+            <p class="card-label">Step 2</p>
+            <h3 style="font-size:1.25rem;">Composite in After Effects</h3>
+            <p>Frame sequences are cleaned up, colored, and timed for full clips.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="step-figure">
+              <img src="Pictures/Steps/roto-step-3.jpg" alt="Editing in CapCut"
+                   data-lightbox loading="lazy">
+            </div>
+            <p class="card-label">Step 3</p>
+            <h3 style="font-size:1.25rem;">Edit &amp; export in CapCut</h3>
+            <p>Final clips are trimmed, synced to music, and exported on mobile.</p>
+          </article>
+
         </div>
       </section>
+
+
     </main>
+
     <footer class="site-footer">
       <p>For Academic Purpose Only</p>
       <p>© 2026 Julianne S. Tumpap | BSIT - NS - 2A | Technological University of the Philippines - Taguig</p>
     </footer>
   </div>
+
+  <div class="music-bar" id="music-bar" aria-live="polite">
+    <span class="music-bar-dot"></span>
+    <span id="music-bar-label">Now playing</span>
+  </div>
+
   <script src="script.js" defer></script>
 </body>
 </html>
